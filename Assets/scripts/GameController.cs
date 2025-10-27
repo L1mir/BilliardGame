@@ -123,13 +123,15 @@ public class GameController : MonoBehaviour
 
     public void NextMove()
     {
-        GetPlayer().isCurrentPlayer = false;
-        if (currentTeam == 1 && currentPlayer+1 == teamSize)
+        var current = GetPlayer();
+        current.isCurrentPlayer = false;
+    
+        if (currentTeam == 1 && currentPlayer + 1 == teamSize)
         {
             currentTeam = 0;
             currentPlayer = 0;
         }
-        else if (currentPlayer+1 == teamSize)
+        else if (currentPlayer + 1 == teamSize)
         {
             currentPlayer = 0;
             currentTeam++;
@@ -138,6 +140,7 @@ public class GameController : MonoBehaviour
         {
             currentPlayer++;
         }
+    
         GetPlayer().isCurrentPlayer = true;
     }
 

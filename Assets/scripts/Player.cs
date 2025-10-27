@@ -2,6 +2,7 @@ using UnityEngine;
 using Unity.Cinemachine;
 using System;
 using System.Collections;
+using Abilities;
 using Unity.VisualScripting;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -30,6 +31,8 @@ public class Player : MonoBehaviour
     [SerializeField] private float min_zoom = 10f;
     [SerializeField] private float max_zoom = 120f;
     
+    [SerializeField] private Ability ability;
+    
     private int balls_scored = 0;
     private GameController gc;
     private int currentBall = 0;
@@ -50,6 +53,18 @@ public class Player : MonoBehaviour
     private bool isStroke = false;
     private bool _isCurrentPlayer = false;
     [NonSerialized] public Vector3 previousBallPosition;
+    
+    private void Start()
+    {
+        gc = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
+
+        ability = gameObject.GetComponent<SizeShiftAbility>();
+        if (ability == null)
+        {
+            ability = gameObject.AddComponent<SizeShiftAbility>();
+            Debug.Log("Добавлен компонент SizeShiftAbility");
+        }
+    }
 
     public bool isCurrentPlayer
     {
@@ -127,6 +142,26 @@ public class Player : MonoBehaviour
         yield return new WaitUntil(() => gc.IsReadyToMove());
         isStroke = false;
         gc.NextMove();
+    }
+    
+    public void OnBallPocketed()
+    {
+        Debug.Log("Шар забит! Текущая способность: " + (ability != null ? ability.name : "не назначена"));
+        if (ability != null)
+        {
+            ability.AddPoint();
+        }
+    }
+    
+    public void UseAbility()
+    {
+        Debug.Log("Попытка использовать способность");
+        // if (ability != null && ability.IsReady)
+        // {
+        //     ability.Activate();
+        // }
+        
+        ability.Activate();
     }
 
     private void SwitchBall()
