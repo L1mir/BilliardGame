@@ -35,16 +35,7 @@ public class Player : MonoBehaviour
     
     private int balls_scored = 0;
     private GameController gc;
-    private int currentBall = 0;
-    
-    public int CurrentBall {
-        get => currentBall;
-        set {
-            currentBall = value;
-            FollowBall();
-        }
-    }
-    
+    private GameObject whiteBall;
     private Animator stick_animator;
     
     [Header("Animation parameters")]
@@ -57,6 +48,7 @@ public class Player : MonoBehaviour
     private void Start()
     {
         gc = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
+        whiteBall = GameObject.FindGameObjectWithTag("WhiteBall");
 
         ability = gameObject.GetComponent<SizeShiftAbility>();
         if (ability == null)
@@ -74,7 +66,6 @@ public class Player : MonoBehaviour
             _isCurrentPlayer = value;
             gameObject.SetActive(value);
             
-            // Заменяем IsPrefabDefinition на стандартную проверку префаба
             if(IsPrefab(stick_prefab))
             {
                 stick_prefab = Instantiate(stick_prefab, camera_prefab.transform.position,
@@ -109,7 +100,6 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
-        SwitchBall();
         if(!isStroke && _isCurrentPlayer) RotateStickAroundTheBall();
         
         CinemachineFollowZoom followZoom = camera_prefab.GetComponent<CinemachineFollowZoom>();
@@ -121,21 +111,40 @@ public class Player : MonoBehaviour
 
     private void RotateStickAroundTheBall()
     {
-        stick_prefab.transform.localRotation = Quaternion.Euler(-12,
-            Mathf.SmoothDampAngle(stick_prefab.transform.eulerAngles.y, 
-            180 + camera_prefab.transform.rotation.eulerAngles.y, 
-            ref stick_rotation_velocity, smooth_time, max_speed), 0);
+        if (whiteBall == null) return;
+
+        stick_prefab.transform.position = whiteBall.transform.position;
+
+        stick_prefab.transform.rotation = Quaternion.Euler(
+            -12, 
+            Mathf.SmoothDampAngle(
+                stick_prefab.transform.eulerAngles.y, 
+                180 + camera_prefab.transform.rotation.eulerAngles.y, 
+                ref stick_rotation_velocity, 
+                smooth_time, 
+                max_speed
+            ), 
+            0
+        );
     }
 
     public IEnumerator MakeStrike()
     {
-        previousBallPosition = gc.GetBall(currentBall).transform.position;
+        if (whiteBall == null)
+        {
+            Debug.LogError("White ball not found!");
+            yield break;
+        }
+
+        previousBallPosition = whiteBall.transform.position;
 
         if (isStroke) yield break;
         isStroke = true;
         stick_animator.SetBool("isStroke", true);
         yield return new WaitForSeconds(strikeAnimationTime);
-        gc.GetBall(currentBall).GetComponent<Rigidbody>().AddForce(-stick_prefab.transform.forward * strike_force, ForceMode.Impulse);
+        
+        whiteBall.GetComponent<Rigidbody>().AddForce(-stick_prefab.transform.forward * strike_force, ForceMode.Impulse);
+        
         stick_animator.SetBool("isStroke", false);
         yield return new WaitForSeconds(cooldownAfterStrike);
         stick_prefab.SetActive(false);
@@ -156,24 +165,7 @@ public class Player : MonoBehaviour
     public void UseAbility()
     {
         Debug.Log("Попытка использовать способность");
-        // if (ability != null && ability.IsReady)
-        // {
-        //     ability.Activate();
-        // }
-        
         ability.Activate();
-    }
-
-    private void SwitchBall()
-    {
-        float index = Input.GetAxis("Mouse ScrollWheel");
-        if (index > 0) index = 1;
-        else if (index < 0) index = -1;
-        if (index != 0)
-        {
-            gc.NextBall((int)index, ref currentBall);
-            FollowBall();
-        }
     }
 
     public void IncrementBallsScored() => balls_scored++;
@@ -189,11 +181,23 @@ public class Player : MonoBehaviour
 
     public void FollowBall()
     {
-        gc = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
-        Transform ball_tr = gc.GetBall(currentBall).transform;
-        camera_prefab.Follow = ball_tr;
-        stick_prefab.transform.position = ball_tr.position;
-    }
+        if (whiteBall == null)
+        {
+            whiteBall = GameObject.FindGameObjectWithTag("WhiteBall");
+            if (whiteBall == null)
+            {
+                Debug.LogError("White ball not found!");
+                return;
+            }
+        }
 
+        if (camera_prefab.Follow != whiteBall.transform)
+        {
+            camera_prefab.Follow = whiteBall.transform;
+        }
+
+        stick_prefab.transform.position = whiteBall.transform.position;
+    }
+    
     public Team GetTeam() => team;
 }

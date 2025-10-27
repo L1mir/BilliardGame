@@ -11,14 +11,15 @@ public class GameController : MonoBehaviour
     [SerializeField] private Team[] teams = new Team[TEAMS_AMOUNT];
 
     private bool isMoveInProgress = false;
-    
     private GameObject[] initialBalls;
     private GameObject[] startPositions;
     private List<GameObject> balls;
     private int currentPlayer = 0;
     private int currentTeam = 0;
     private float stopThreshold = 0.01f;
-    private float dampingCoefficient = 0.5f;
+    private float dampingCoefficient = 0.6f;
+    private GameObject whiteBall;
+    private Vector3 whiteBallStartPosition;
 
     private void Awake()
     {
@@ -72,15 +73,35 @@ public class GameController : MonoBehaviour
         return teams[team].GetPlayer(index);
     }
 
-    public void InitializeBalls()
+    private void InitializeBalls()
     {
-        initialBalls = GameObject.FindGameObjectsWithTag("Ball");
-        foreach (var ball in initialBalls) ball.GetComponent<Rigidbody>().linearDamping = dampingCoefficient;
-        balls = RandomSort(initialBalls);
-        startPositions = GameObject.FindGameObjectsWithTag("StartPosition");
-        for (int i = 0;i < balls.Count;i++)
+        var whiteBall = GameObject.FindGameObjectWithTag("WhiteBall");
+        var whiteBallStartPos = GameObject.FindGameObjectWithTag("WhiteBallStartPosition");
+        var ballPositions = GameObject.FindGameObjectsWithTag("StartPosition");
+        var allBalls = GameObject.FindGameObjectsWithTag("Ball");
+        
+        balls = new List<GameObject>();
+        
+        if (whiteBall != null && whiteBallStartPos != null)
         {
-            balls[i].transform.position = startPositions[i].transform.position;
+            whiteBall.transform.position = whiteBallStartPos.transform.position;
+            whiteBall.GetComponent<Rigidbody>().linearDamping = dampingCoefficient;
+        }
+        else
+        {
+            Debug.LogError("Белый шар или его стартовая позиция не найдены!");
+            return;
+        }
+
+        var otherBalls = allBalls.Where(b => b != whiteBall).ToArray();
+
+        var shuffledPositions = RandomSort(ballPositions);
+
+        for (int i = 0; i < otherBalls.Length && i < shuffledPositions.Count; i++)
+        {
+            otherBalls[i].transform.position = shuffledPositions[i].transform.position;
+            otherBalls[i].GetComponent<Rigidbody>().linearDamping = dampingCoefficient;
+            balls.Add(otherBalls[i]);
         }
     }
 
@@ -144,24 +165,6 @@ public class GameController : MonoBehaviour
         GetPlayer().isCurrentPlayer = true;
     }
 
-    public void NextBall(int axis,ref int currentBall)
-    {
-        currentBall += axis;
-        if (currentBall >= balls.Count) currentBall = 0;
-        if (currentBall < 0) currentBall = balls.Count - 1;
-    }
-
-    public GameObject GetBall(int index)
-    {
-        if (index >= balls.Count)
-        {
-
-            GetPlayer().CurrentBall = balls.Count-1;
-            return balls[GetPlayer().CurrentBall];
-        }
-        return balls[index];
-    }
-
     public void RemoveBall(GameObject ball)
     {
         ball.SetActive(false);
@@ -180,7 +183,6 @@ public class GameController : MonoBehaviour
     {
         ball.GetComponent<Rigidbody>().angularVelocity = new Vector3(0, 0, 0);
         ball.GetComponent<Rigidbody>().linearVelocity = new Vector3(0, 0, 0);
-        ball.transform.position = GetPlayer().previousBallPosition;
     }
 
     public Team GetTeamByType(TeamType type)

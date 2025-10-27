@@ -4,6 +4,7 @@ public class Counter : MonoBehaviour
 {
     private GameController gc;
     private GameFinisher gameFinisher;
+    
     void Start()
     {
         gc = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
@@ -31,6 +32,25 @@ public class Counter : MonoBehaviour
             else
             {
                 Debug.LogError("Error , gamecontroller null");
+            }
+        } 
+        else if (other.CompareTag("WhiteBall"))
+        {
+            var whiteBall = other.gameObject; // Use the colliding object directly
+            var whiteBallStartPos = GameObject.FindGameObjectWithTag("WhiteBallStartPosition");
+            if (whiteBall != null && whiteBallStartPos != null)
+            {
+                Rigidbody rb = whiteBall.GetComponent<Rigidbody>();
+                if (rb != null)
+                {
+                    rb.linearVelocity = Vector3.zero;
+                    rb.angularVelocity = Vector3.zero;
+                    rb.MovePosition(whiteBallStartPos.transform.position);
+                }
+                else
+                {
+                    whiteBall.transform.position = whiteBallStartPos.transform.position;
+                }
             }
         }
     }
