@@ -51,7 +51,7 @@ public class UIController : MonoBehaviour
         strike_force_scroll_bar.colors = colorBlock;
     }
 
-    public void UpdateCamerZoomPrecents(float value)
+    public void UpdateCameraZoomPrecents(float value)
     {
         camera_zoom_precents_text.text = ((int)(value * 100)).ToString() + "%";
     }

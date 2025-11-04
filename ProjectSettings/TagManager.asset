@@ -6,6 +6,8 @@ TagManager:
   tags:
   - Ball
   - StartPosition
+  - WhiteBall
+  - WhiteBallStartPosition
   layers:
   - Default
   - TransparentFX
@@ -13,8 +15,8 @@ TagManager:
   - Board
   - Water
   - UI
-  - strip
-  - solid
+  - Strip
+  - Solid
   - 
   - 
   - 

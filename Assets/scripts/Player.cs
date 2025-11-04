@@ -104,7 +104,7 @@ public class Player : MonoBehaviour
         
         CinemachineFollowZoom followZoom = camera_prefab.GetComponent<CinemachineFollowZoom>();
         AdjustValue(Input.GetAxis("Horizontal"), ref followZoom.FovRange.y, min_zoom, max_zoom, 
-            zoom_changing_factor, UIController.Instance.UpdateCamerZoomPrecents);
+            zoom_changing_factor, UIController.Instance.UpdateCameraZoomPrecents);
         AdjustValue(Input.GetAxis("Vertical"), ref strike_force, min_force, max_force, 
             force_changing_factor, UIController.Instance.UpdateScrollBar);
     }
