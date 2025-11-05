@@ -19,7 +19,6 @@ public class Counter : MonoBehaviour
             {
                 Player currentPlayer = gc.GetPlayer();
                 currentPlayer.IncrementBallsScored();
-                currentPlayer.OnBallPocketed();
                 Team scoredTeam = gc.GetTeamByType((TeamType)other.gameObject.layer);
                 scoredTeam.IncrementScore();
                 Debug.Log(scoredTeam.name + " " + scoredTeam.BallsOwnTypeScored);

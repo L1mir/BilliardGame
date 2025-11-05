@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.Serialization;
 
 public class UIController : MonoBehaviour
 {
@@ -17,6 +18,10 @@ public class UIController : MonoBehaviour
     [SerializeField] private Scrollbar motionblur_intensity;
     [SerializeField] private Toggle tonemapping_enabled;
 
+    [SerializeField] private TextMeshProUGUI current_player_text;
+    [SerializeField] private GameObject current_player_panel;
+    [SerializeField] private float player_panel_display_time = 2f;
+         
     private void Awake()
     {
         Instance = this;
@@ -25,6 +30,26 @@ public class UIController : MonoBehaviour
             music_volume_scroll_bar.value = PlayerPrefs.GetFloat("MusicVolume");
         }
         LoadVolumeComponentsValues();
+
+        if (current_player_panel != null)
+        {
+            current_player_panel.SetActive(false);
+        }
+    }
+
+    public void ShowCurrentPlayer(string teamName)
+    {
+        if (current_player_text != null && current_player_panel != null)
+        {
+            current_player_text.text = $"{teamName}";
+            current_player_panel.SetActive(true);
+        }
+    }
+    
+    private void HidePlayerPanel()
+    {
+        if (current_player_panel != null)
+            current_player_panel.SetActive(false);
     }
 
     private void LoadVolumeComponentsValues()

@@ -16,8 +16,8 @@ public class GameController : MonoBehaviour
     private List<GameObject> balls;
     private int currentPlayer = 0;
     private int currentTeam = 0;
-    private float stopThreshold = 0.01f;
-    private float dampingCoefficient = 0.6f;
+    private float stopThreshold = 0.5f;
+    private float dampingCoefficient = 0.3f;
     private GameObject whiteBall;
     private Vector3 whiteBallStartPosition;
 
@@ -43,6 +43,17 @@ public class GameController : MonoBehaviour
 
     public void ForceNextMove()
     {
+        currentPlayer++;
+        
+        if (currentPlayer >= teams[currentTeam].Size)
+        {
+            currentPlayer = 0;
+            currentTeam = (currentTeam + 1) % TEAMS_AMOUNT;
+        }
+        
+        var player = GetPlayer();
+        player.isCurrentPlayer = true;
+        
         foreach (var ball in balls)
         {
             if (ball.activeInHierarchy)
@@ -55,6 +66,12 @@ public class GameController : MonoBehaviour
         
         NextMove();
         isMoveInProgress = false;
+    }
+    
+    private void ShowCurrentPlayerInfo()
+    {
+        string teamName = currentTeam == 0 ? "stripes" : "solids";
+        UIController.Instance?.ShowCurrentPlayer(teamName);
     }
 
     public Player GetPlayer(int index = -1,int team = -1)
@@ -163,6 +180,7 @@ public class GameController : MonoBehaviour
         }
     
         GetPlayer().isCurrentPlayer = true;
+        ShowCurrentPlayerInfo();
     }
 
     public void RemoveBall(GameObject ball)

@@ -31,8 +31,6 @@ public class Player : MonoBehaviour
     [SerializeField] private float min_zoom = 10f;
     [SerializeField] private float max_zoom = 120f;
     
-    [SerializeField] private Ability ability;
-    
     private int balls_scored = 0;
     private GameController gc;
     private GameObject whiteBall;
@@ -49,13 +47,6 @@ public class Player : MonoBehaviour
     {
         gc = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
         whiteBall = GameObject.FindGameObjectWithTag("WhiteBall");
-
-        ability = gameObject.GetComponent<SizeShiftAbility>();
-        if (ability == null)
-        {
-            ability = gameObject.AddComponent<SizeShiftAbility>();
-            Debug.Log("Добавлен компонент SizeShiftAbility");
-        }
     }
 
     public bool isCurrentPlayer
@@ -151,21 +142,6 @@ public class Player : MonoBehaviour
         yield return new WaitUntil(() => gc.IsReadyToMove());
         isStroke = false;
         gc.NextMove();
-    }
-    
-    public void OnBallPocketed()
-    {
-        Debug.Log("Шар забит! Текущая способность: " + (ability != null ? ability.name : "не назначена"));
-        if (ability != null)
-        {
-            ability.AddPoint();
-        }
-    }
-    
-    public void UseAbility()
-    {
-        Debug.Log("Попытка использовать способность");
-        ability.Activate();
     }
 
     public void IncrementBallsScored() => balls_scored++;

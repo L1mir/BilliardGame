@@ -72,6 +72,7 @@ namespace Abilities
         
         public void ActivateGhostBall()
         {
+            Debug.Log("ActivateGhostBall вызван");
             OnActivate();
         }
 

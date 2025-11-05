@@ -24,35 +24,29 @@ namespace Abilities
             {
                 if (ball.activeInHierarchy && ball.TryGetComponent<Rigidbody>(out var rb))
                 {
-                    // Сохраняем оригинальные значения (кроме массы)
                     originalValues[ball] = (
                         ball.transform.localScale,
                         rb.linearDamping,
                         rb.angularDamping
                     );
                     
-                    // Уменьшаем шар, но оставляем массу неизменной
                     ball.transform.localScale *= shrinkFactor;
-                    // rb.mass остается прежней - не изменяем массу
-                    rb.linearDamping *= 0.5f; // Уменьшаем сопротивление
-                    rb.angularDamping *= 0.5f; // Уменьшаем угловое сопротивление
-                    
-                    // Обновляем коллайдер
+                    rb.linearDamping *= 0.5f;
+                    rb.angularDamping *= 0.5f;
+
                     if (ball.TryGetComponent<SphereCollider>(out var collider))
                     {
-                        collider.radius = 0.5f; // Возвращаем радиус к стандартному значению (1.0f * shrinkFactor)
+                        collider.radius = 0.5f;
                     }
                 }
             }
-            
-            // Запускаем таймер для автоматического сброса через duration секунд
+
             Invoke(nameof(ResetBalls), duration);
         }
         
-        private void Update()
+        public void ActivateSizeShiftAbility()
         {
-            // Убрали проверку нажатия E, так как это конфликтует с логикой удара
-            // Способность теперь сбрасывается автоматически через duration секунд
+            OnActivate();
         }
         
         private void ResetBalls()
@@ -64,16 +58,13 @@ namespace Abilities
                 var ball = pair.Key;
                 if (ball != null && ball.activeInHierarchy && ball.TryGetComponent<Rigidbody>(out var rb))
                 {
-                    // Восстанавливаем оригинальные значения (кроме массы)
                     ball.transform.localScale = pair.Value.scale;
-                    // rb.mass не восстанавливаем, так как не изменяли
                     rb.linearDamping = pair.Value.drag;
                     rb.angularDamping = pair.Value.angularDrag;
-                    
-                    // Восстанавливаем коллайдер
+
                     if (ball.TryGetComponent<SphereCollider>(out var collider))
                     {
-                        collider.radius = 0.5f; // Стандартный радиус для шара
+                        collider.radius = 0.5f;
                     }
                 }
             }
@@ -85,7 +76,6 @@ namespace Abilities
         
         private void OnDisable()
         {
-            // При отключении компонента сбрасываем все изменения
             if (isActive)
             {
                 ResetBalls();
