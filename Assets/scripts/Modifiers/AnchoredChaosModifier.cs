@@ -3,8 +3,6 @@ using System.Collections.Generic;
 
 public class AnchoredChaosModifier : GameModifier
 {
-    [SerializeField] private float minAnchorDuration = 5f;
-    [SerializeField] private float maxAnchorDuration = 10f;
     [SerializeField] private int minAnchoredBalls = 2;
     [SerializeField] private int maxAnchoredBalls = 5;
     [SerializeField] private Color anchoredColor = Color.gray;
@@ -43,8 +41,6 @@ public class AnchoredChaosModifier : GameModifier
             }
 
             ballRb.isKinematic = true;
-
-            StartCoroutine(UnanchorBallAfterDelay(ballRb, Random.Range(minAnchorDuration, maxAnchorDuration)));
             
             allBalls.RemoveAt(randomIndex);
         }
@@ -52,7 +48,7 @@ public class AnchoredChaosModifier : GameModifier
 
     public void UseModifier()
     {
-        OnActivate();
+        Activate();
     }
     
     private System.Collections.IEnumerator UnanchorBallAfterDelay(Rigidbody ballRb, float delay)

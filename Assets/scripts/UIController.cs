@@ -20,7 +20,6 @@ public class UIController : MonoBehaviour
 
     [SerializeField] private TextMeshProUGUI current_player_text;
     [SerializeField] private GameObject current_player_panel;
-    [SerializeField] private float player_panel_display_time = 2f;
          
     private void Awake()
     {

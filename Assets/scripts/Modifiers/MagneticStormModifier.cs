@@ -9,14 +9,12 @@ public class MagneticStormModifier : GameModifier
     
     private List<Rigidbody> allBalls = new List<Rigidbody>();
     private Dictionary<Rigidbody, Color> originalColors = new Dictionary<Rigidbody, Color>();
-    private List<ParticleSystem> activeParticles = new List<ParticleSystem>();
-    private bool isActive = false;
 
     protected override void OnActivate()
     {
-        isActive = true;
         var balls = GameObject.FindGameObjectsWithTag("Ball");
         allBalls.Clear();
+        originalColors.Clear();
         
         foreach (var ball in balls)
         {
@@ -37,13 +35,20 @@ public class MagneticStormModifier : GameModifier
 
     public void UseMagneticStorm()
     {
-        OnActivate();
+        Activate();
     }
 
-    private void Update()
+    protected override void Update()
     {
-        if (!isActive) return;
+        base.Update(); // Теперь это вызывает базовый Update с таймером
+        
+        if (!IsActive) return; // ВАЖНО: не применяем силы если модификатор неактивен
 
+        ApplyMagneticForces();
+    }
+
+    private void ApplyMagneticForces()
+    {
         for (int i = 0; i < allBalls.Count; i++)
         {
             if (allBalls[i] == null) continue;
@@ -70,7 +75,17 @@ public class MagneticStormModifier : GameModifier
 
     protected override void OnDeactivate()
     {
-        isActive = false;
+        // Останавливаем физику у всех шаров
+        foreach (var ball in allBalls)
+        {
+            if (ball != null)
+            {
+                ball.linearVelocity = Vector3.zero;
+                ball.angularVelocity = Vector3.zero;
+            }
+        }
+    
+        // Возвращаем цвета
         foreach (var kvp in originalColors)
         {
             if (kvp.Key != null)
@@ -79,6 +94,11 @@ public class MagneticStormModifier : GameModifier
                 if (renderer != null) renderer.material.color = kvp.Value;
             }
         }
+    
+        // Очищаем списки
+        allBalls.Clear();
         originalColors.Clear();
+    
+        Debug.Log("MagneticStorm deactivated!");
     }
 }

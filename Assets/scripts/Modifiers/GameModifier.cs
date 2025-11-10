@@ -16,6 +16,7 @@ public abstract class GameModifier : MonoBehaviour
 
     public virtual void Activate()
     {
+        if (isActive) return;
         isActive = true;
         remainingTime = duration;
         OnActivate();

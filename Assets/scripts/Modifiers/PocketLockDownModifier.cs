@@ -42,7 +42,7 @@ public class PocketLockDownModifier : GameModifier
 
     public void UsePocketLockDown()
     {
-        OnActivate();
+        Activate();
     }
     
     protected override void OnDeactivate()
