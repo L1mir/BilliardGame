@@ -40,9 +40,9 @@ public class MagneticStormModifier : GameModifier
 
     protected override void Update()
     {
-        base.Update(); // Теперь это вызывает базовый Update с таймером
+        base.Update();
         
-        if (!IsActive) return; // ВАЖНО: не применяем силы если модификатор неактивен
+        if (!IsActive) return;
 
         ApplyMagneticForces();
     }
@@ -75,7 +75,6 @@ public class MagneticStormModifier : GameModifier
 
     protected override void OnDeactivate()
     {
-        // Останавливаем физику у всех шаров
         foreach (var ball in allBalls)
         {
             if (ball != null)
@@ -84,8 +83,7 @@ public class MagneticStormModifier : GameModifier
                 ball.angularVelocity = Vector3.zero;
             }
         }
-    
-        // Возвращаем цвета
+
         foreach (var kvp in originalColors)
         {
             if (kvp.Key != null)
@@ -94,8 +92,7 @@ public class MagneticStormModifier : GameModifier
                 if (renderer != null) renderer.material.color = kvp.Value;
             }
         }
-    
-        // Очищаем списки
+
         allBalls.Clear();
         originalColors.Clear();
     

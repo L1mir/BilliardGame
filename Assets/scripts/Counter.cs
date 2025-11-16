@@ -27,6 +27,11 @@ public class Counter : MonoBehaviour
                     StartCoroutine(gameFinisher.FinishGame(scoredTeam));
                 }
                 gc.RemoveBall(other.gameObject);
+                if (ModifierManager.Instance != null)
+                {
+                    ModifierManager.Instance.ActivateRandomModifier();
+                    Debug.Log("Random Modifier activated");
+                }
             }
             else
             {

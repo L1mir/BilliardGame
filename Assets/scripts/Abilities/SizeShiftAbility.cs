@@ -10,14 +10,12 @@ namespace Abilities
         
         private Dictionary<GameObject, (Vector3 scale, float drag, float angularDrag)> originalValues = new();
         private GameObject currentPlayerBall;
-        private bool isActive = false;
         
         protected override void OnActivate()
         {
             var gameController = FindObjectOfType<GameController>();
             if (gameController == null) return;
             
-            isActive = true;
             var allBalls = GameObject.FindGameObjectsWithTag("Ball");
             
             foreach (var ball in allBalls)
@@ -46,7 +44,8 @@ namespace Abilities
         
         public void ActivateSizeShiftAbility()
         {
-            OnActivate();
+            if (isActive) return;
+            Activate();
         }
         
         private void ResetBalls()
