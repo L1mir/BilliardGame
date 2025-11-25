@@ -13,6 +13,11 @@ namespace Abilities
         private const string STRIP_LAYER = "Strip";
         private const string WHITE_BALL_TAG = "WhiteBall";
         private const string BALL_TAG = "Ball";
+        
+        private void Awake()
+        {
+            abilityCost = 1;
+        }
 
         public void UseBallSwap()
         {
@@ -22,6 +27,19 @@ namespace Abilities
         
         protected override void OnActivate()
         {
+            GameController gameController = FindObjectOfType<GameController>();
+            Player currentPlayer = gameController.GetPlayer();
+            
+            if (currentPlayer == null) return;
+            if (currentPlayer.AbilityPoints < abilityCost)
+            {
+                Debug.Log("Not enough points!" + currentPlayer.AbilityPoints);
+                return;
+            }
+            
+            currentPlayer.AbilityPoints -= abilityCost;
+            gameController.ShowCurrentPlayerInfo();
+            
             if (isActive) 
             {
                 Debug.LogWarning("Ability already active!");

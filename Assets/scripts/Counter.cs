@@ -18,6 +18,8 @@ public class Counter : MonoBehaviour
             if (gc!=null)
             {
                 Player currentPlayer = gc.GetPlayer();
+                currentPlayer.AbilityPoints += 1;
+                Debug.Log("Current player points:" + currentPlayer.AbilityPoints);
                 currentPlayer.IncrementBallsScored();
                 Team scoredTeam = gc.GetTeamByType((TeamType)other.gameObject.layer);
                 scoredTeam.IncrementScore();

@@ -3,10 +3,6 @@ using Unity.Cinemachine;
 using System;
 using System.Collections;
 using Abilities;
-using Unity.VisualScripting;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 
 public enum TeamType
 {
@@ -36,6 +32,14 @@ public class Player : MonoBehaviour
     private GameObject whiteBall;
     private Animator stick_animator;
     
+    private int abilityPoints = 0;
+
+    public int AbilityPoints
+    {
+        get => abilityPoints;
+        set => abilityPoints = value;
+    }
+
     [Header("Animation parameters")]
     [SerializeField] private float strikeAnimationTime = 1.15f;
     [SerializeField] private float cooldownAfterStrike = 1.5f;
@@ -77,11 +81,11 @@ public class Player : MonoBehaviour
 
     private bool IsPrefab(GameObject obj)
     {
-        #if UNITY_EDITOR
-        return UnityEditor.PrefabUtility.IsPartOfPrefabAsset(obj);
-        #else
-        return obj.scene.name == null;
-        #endif
+        if (obj == null) return false;
+        
+        // Check if object is a prefab by verifying if it's in a valid scene
+        // Prefabs are not part of any scene, instantiated objects are
+        return !obj.scene.IsValid();
     }
 
     private void Awake()

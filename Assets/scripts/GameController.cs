@@ -68,10 +68,11 @@ public class GameController : MonoBehaviour
         isMoveInProgress = false;
     }
     
-    private void ShowCurrentPlayerInfo()
+    public void ShowCurrentPlayerInfo()
     {
         string teamName = currentTeam == 0 ? "stripes" : "solids";
-        UIController.Instance?.ShowCurrentPlayer(teamName);
+        int abilityPoints = GetPlayer().AbilityPoints;
+        UIController.Instance?.ShowCurrentPlayer(teamName, abilityPoints);
     }
 
     public Player GetPlayer(int index = -1,int team = -1)

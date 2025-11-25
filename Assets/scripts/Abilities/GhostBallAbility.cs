@@ -8,6 +8,11 @@ namespace Abilities
         private float remainingTime = 0f;
         private Collider whiteBallCollider;
 
+        private void Awake()
+        {
+            abilityCost = 1;
+        }
+
         protected override void OnActivate()
         {
             if (isActive) return;
@@ -21,7 +26,17 @@ namespace Abilities
             if (gameController == null) return;
 
             Player currentPlayer = gameController.GetPlayer();
+            
             if (currentPlayer == null) return;
+
+            if (currentPlayer.AbilityPoints < abilityCost)
+            {
+                Debug.Log("Ghost Ball points declined");
+                return;
+            }
+            
+            currentPlayer.AbilityPoints -= abilityCost;
+            gameController.ShowCurrentPlayerInfo();
 
             Team currentTeam = currentPlayer.GetTeam();
             if (currentTeam == null) return;
@@ -66,7 +81,6 @@ namespace Abilities
             if (remainingTime <= 0)
             {
                 Deactivate();
-                Debug.unityLogger.Log("GhostBallAbility", "GhostBallAbility Deactivated");
             }
         }
         

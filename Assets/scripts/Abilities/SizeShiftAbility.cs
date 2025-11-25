@@ -11,10 +11,26 @@ namespace Abilities
         private Dictionary<GameObject, (Vector3 scale, float drag, float angularDrag)> originalValues = new();
         private GameObject currentPlayerBall;
         
+        private void Awake()
+        {
+            abilityCost = 1;
+        }
+        
         protected override void OnActivate()
         {
+            
             var gameController = FindObjectOfType<GameController>();
             if (gameController == null) return;
+            
+            Player currentPlayer = gameController.GetPlayer();
+            if (currentPlayer.AbilityPoints < abilityCost)
+            {
+                Debug.Log("No points!");
+                return;
+            }
+            
+            currentPlayer.AbilityPoints -= abilityCost;
+            gameController.ShowCurrentPlayerInfo();
             
             var allBalls = GameObject.FindGameObjectsWithTag("Ball");
             
