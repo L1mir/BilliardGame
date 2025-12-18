@@ -66,6 +66,7 @@ namespace Abilities
                     if (renderer != null)
                     {
                         Color color = renderer.material.color;
+                        
                         color.a = 0.5f;
                         renderer.material.color = color;
                     }

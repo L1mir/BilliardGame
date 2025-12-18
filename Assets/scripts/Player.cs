@@ -27,6 +27,12 @@ public class Player : MonoBehaviour
     [SerializeField] private float min_zoom = 10f;
     [SerializeField] private float max_zoom = 120f;
     
+    [Header("Audio")]
+    [SerializeField] private AudioClip strikeSound;
+    [SerializeField] private float strikeSoundVolume = 1f;
+    
+    private AudioSource audioSource; 
+    
     private int balls_scored = 0;
     private GameController gc;
     private GameObject whiteBall;
@@ -51,6 +57,13 @@ public class Player : MonoBehaviour
     {
         gc = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
         whiteBall = GameObject.FindGameObjectWithTag("WhiteBall");
+        
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+        audioSource.playOnAwake = false;
     }
 
     public bool isCurrentPlayer
@@ -76,6 +89,18 @@ public class Player : MonoBehaviour
             
             stick_prefab.SetActive(value);
             if (value) FollowBall();
+        }
+    }
+    
+    public void PlayStrikeSound()
+    {
+        if (strikeSound != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(strikeSound, strikeSoundVolume);
+        }
+        else
+        {
+            Debug.LogWarning("Strike sound or AudioSource is missing!");
         }
     }
 

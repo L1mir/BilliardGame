@@ -32,6 +32,7 @@ public class GameController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.E) && !isMoveInProgress)
         {
             isMoveInProgress = true;
+            GetPlayer().PlayStrikeSound();
             StartCoroutine(GetPlayer().MakeStrike());
         }
 
