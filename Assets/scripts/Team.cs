@@ -6,6 +6,12 @@ public class Team : MonoBehaviour
     [SerializeField] private TeamType teamType;
     public int BallsOwnTypeScored { get; private set; } = 0;
     [SerializeField] private Player[] players;
+    
+    public void SetTeamType(TeamType teamType)
+    {
+        this.teamType = teamType;
+    }
+    
     public int Size
     {
         get

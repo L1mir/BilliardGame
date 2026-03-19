@@ -1,10 +1,10 @@
- using UnityEngine;
+using UnityEngine;
 
 public class Counter : MonoBehaviour
 {
     private GameController gc;
     private GameFinisher gameFinisher;
-    
+
     void Start()
     {
         gc = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
@@ -13,22 +13,45 @@ public class Counter : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if(other.CompareTag("Ball"))
+        if (other.CompareTag("Ball"))
         {
-            if (gc!=null)
+            if (gc != null)
             {
                 Player currentPlayer = gc.GetPlayer();
-                currentPlayer.AbilityPoints += 1;
-                Debug.Log("Current player points:" + currentPlayer.AbilityPoints);
-                currentPlayer.IncrementBallsScored();
-                Team scoredTeam = gc.GetTeamByType((TeamType)other.gameObject.layer);
-                scoredTeam.IncrementScore();
-                Debug.Log(scoredTeam.name + " " + scoredTeam.BallsOwnTypeScored);
-                if(scoredTeam.IsScoredEveryOwnTypeBall())
+                Team currentTeam = currentPlayer.GetTeam();
+                Team otherTeam = gc.GetOtherTeam(currentTeam);
+
+                TeamType ballType = (TeamType)other.gameObject.layer;
+
+                if (!gc.AreTeamTypesAssigned)
                 {
-                    StartCoroutine(gameFinisher.FinishGame(scoredTeam));
+                    gc.AssignTeamTypes(currentTeam, ballType);
                 }
+
+                TeamType currentTeamType = currentTeam.GetTeamType();
+
+                if (ballType == currentTeamType)
+                {
+                    currentPlayer.AbilityPoints += 1;
+                    Debug.Log("Current player points:" + currentPlayer.AbilityPoints);
+
+                    currentPlayer.IncrementBallsScored();
+                    currentTeam.IncrementScore();
+
+                    Debug.Log(currentTeam.name + " " + currentTeam.BallsOwnTypeScored);
+
+                    if (currentTeam.IsScoredEveryOwnTypeBall())
+                    {
+                        StartCoroutine(gameFinisher.FinishGame(currentTeam));
+                    }
+                }
+                else
+                {
+                    otherTeam.IncrementScore();
+                }
+                
                 gc.RemoveBall(other.gameObject);
+
                 if (ModifierManager.Instance != null)
                 {
                     ModifierManager.Instance.ActivateRandomModifier();
@@ -39,10 +62,10 @@ public class Counter : MonoBehaviour
             {
                 Debug.LogError("Error , gamecontroller null");
             }
-        } 
+        }
         else if (other.CompareTag("WhiteBall"))
         {
-            var whiteBall = other.gameObject; // Use the colliding object directly
+            var whiteBall = other.gameObject;
             var whiteBallStartPos = GameObject.FindGameObjectWithTag("WhiteBallStartPosition");
             if (whiteBall != null && whiteBallStartPos != null)
             {

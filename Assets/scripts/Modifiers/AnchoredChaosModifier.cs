@@ -1,7 +1,8 @@
 using UnityEngine;
 using System.Collections.Generic;
+using DefaultNamespace;
 
-public class AnchoredChaosModifier : GameModifier
+public class AnchoredChaosModifier : GameModifier, IEndOfTurnEffect
 {
     [SerializeField] private int minAnchoredBalls = 2;
     [SerializeField] private int maxAnchoredBalls = 5;
@@ -10,8 +11,20 @@ public class AnchoredChaosModifier : GameModifier
     private Dictionary<Rigidbody, Color> originalBalls = new Dictionary<Rigidbody, Color>();
     private List<Rigidbody> allBalls = new List<Rigidbody>();
     
+    public void UseModifier()
+    {
+        Activate();
+    }
+    
+    protected override void Update()
+    {
+        // disable timer(user turn based)
+    }
+    
     protected override void OnActivate()
     {
+        FindObjectOfType<TurnEffectManager>().Register(this);
+        
         var balls = GameObject.FindGameObjectsWithTag("Ball");
         allBalls.Clear();
         
@@ -45,10 +58,11 @@ public class AnchoredChaosModifier : GameModifier
             allBalls.RemoveAt(randomIndex);
         }
     }
-
-    public void UseModifier()
+    
+    public void OnTurnEnd()
     {
-        Activate();
+        Deactivate();
+        FindObjectOfType<TurnEffectManager>().Unregister(this);
     }
     
     private System.Collections.IEnumerator UnanchorBallAfterDelay(Rigidbody ballRb, float delay)

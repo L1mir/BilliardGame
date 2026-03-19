@@ -1,32 +1,30 @@
-﻿using UnityEngine;
+﻿using DefaultNamespace;
+using UnityEngine;
 
 namespace Abilities
 {
-    public class GhostBallAbility : Ability
+    public class GhostBallAbility : Ability, IEndOfTurnEffect
     {
-        [SerializeField] private float abilityDuration = 10f;
-        private float remainingTime = 0f;
         private Collider whiteBallCollider;
 
         private void Awake()
         {
-            abilityCost = 1;
+            abilityCost = 0;
         }
 
         protected override void OnActivate()
         {
-            if (isActive) return;
-            isActive = true;
+            var turnManager = FindObjectOfType<TurnEffectManager>();
+            if (turnManager != null)
+            {
+                turnManager.Register(this);
+            }
             
-            remainingTime = abilityDuration;
-
             var allBalls = GameObject.FindGameObjectsWithTag("Ball");
             GameController gameController = FindObjectOfType<GameController>();
-            
             if (gameController == null) return;
 
             Player currentPlayer = gameController.GetPlayer();
-            
             if (currentPlayer == null) return;
 
             if (currentPlayer.AbilityPoints < abilityCost)
@@ -34,13 +32,13 @@ namespace Abilities
                 Debug.Log("Ghost Ball points declined");
                 return;
             }
-            
+
             currentPlayer.AbilityPoints -= abilityCost;
             gameController.ShowCurrentPlayerInfo();
 
             Team currentTeam = currentPlayer.GetTeam();
             if (currentTeam == null) return;
-            
+
             int layerToIgnore = currentTeam.GetTeamType() == TeamType.Solid ? 
                 LayerMask.NameToLayer("Strip") : 
                 LayerMask.NameToLayer("Solid");
@@ -66,29 +64,29 @@ namespace Abilities
                     if (renderer != null)
                     {
                         Color color = renderer.material.color;
-                        
                         color.a = 0.5f;
                         renderer.material.color = color;
                     }
                 }
             }
         }
-
-        private void Update()
+        
+        public void OnTurnEnd()
         {
-            if (!isActive) return;
+            Deactivate();
 
-            remainingTime -= Time.deltaTime;
-            if (remainingTime <= 0)
+            var turnManager = FindObjectOfType<TurnEffectManager>();
+            if (turnManager != null)
             {
-                Deactivate();
+                turnManager.Unregister(this);
             }
         }
         
         public void ActivateGhostBall()
         {
+            if (isActive) return;
             Debug.Log("ActivateGhostBall вызван");
-            OnActivate();
+            Activate();
         }
 
         private void Deactivate()

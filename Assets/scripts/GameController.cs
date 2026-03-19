@@ -20,7 +20,29 @@ public class GameController : MonoBehaviour
     private float dampingCoefficient = 0.3f;
     private GameObject whiteBall;
     private Vector3 whiteBallStartPosition;
+    private bool teamTypesAssigned = false;
+    
+    [SerializeField] private TurnEffectManager turnEffectManager;
 
+    public Team GetOtherTeam(Team team)
+    {
+        return teams[0] == team ? teams[1] : teams[0];
+    }
+    
+    public bool AreTeamTypesAssigned => teamTypesAssigned;
+
+    public void AssignTeamTypes(Team firstScoringTeam, TeamType ballType)
+    {
+        if (teamTypesAssigned) return;
+
+        Team otherTeam = GetOtherTeam(firstScoringTeam);
+
+        firstScoringTeam.SetTeamType(ballType);
+        otherTeam.SetTeamType(ballType == TeamType.Strip ? TeamType.Solid : TeamType.Strip);
+
+        teamTypesAssigned = true;
+    }
+    
     private void Awake()
     {
         InitializeBalls();
@@ -44,6 +66,8 @@ public class GameController : MonoBehaviour
 
     public void ForceNextMove()
     {
+        turnEffectManager?.EndTurn();
+        
         currentPlayer++;
         
         if (currentPlayer >= teams[currentTeam].Size)
@@ -71,8 +95,19 @@ public class GameController : MonoBehaviour
     
     public void ShowCurrentPlayerInfo()
     {
-        string teamName = currentTeam == 0 ? "stripes" : "solids";
-        int abilityPoints = GetPlayer().AbilityPoints;
+        Player player = GetPlayer();
+        Team team = player.GetTeam();
+        TeamType type = team.GetTeamType();
+
+        string teamName;
+        if (type == TeamType.Strip)
+            teamName = "stripes";
+        else if (type == TeamType.Solid)
+            teamName = "solids";
+        else
+            teamName = "unknown";
+
+        int abilityPoints = player.AbilityPoints;
         UIController.Instance?.ShowCurrentPlayer(teamName, abilityPoints);
     }
 
@@ -163,6 +198,8 @@ public class GameController : MonoBehaviour
 
     public void NextMove()
     {
+        turnEffectManager?.EndTurn();
+        
         var current = GetPlayer();
         current.isCurrentPlayer = false;
     

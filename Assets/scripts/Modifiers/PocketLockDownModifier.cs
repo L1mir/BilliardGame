@@ -1,17 +1,25 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using DefaultNamespace;
 
-public class PocketLockDownModifier : GameModifier
+public class PocketLockDownModifier : GameModifier, IEndOfTurnEffect
 {
-    [Header("Lock Settings")]
-    [SerializeField] private int minLockedPockets = 1;
+    [Header("Lock Settings")] [SerializeField]
+    private int minLockedPockets = 1;
+
     [SerializeField] private int maxLockedPockets = 3;
-    
+
     private List<GameObject> lockedPockets = new List<GameObject>();
 
     protected override void OnActivate()
     {
+        var turnManager = FindObjectOfType<TurnEffectManager>();
+        if (turnManager != null)
+        {
+            turnManager.Register(this);
+        }
+
         var pockets = GameObject.FindGameObjectsWithTag("Pocket");
         if (pockets.Length == 0)
         {
@@ -32,11 +40,27 @@ public class PocketLockDownModifier : GameModifier
             var pocket = shuffledPockets[i];
             var renderer = pocket.GetComponent<MeshRenderer>();
             var collider = pocket.GetComponent<CapsuleCollider>();
-            
+
             if (renderer != null) renderer.enabled = true;
             if (collider != null) collider.enabled = true;
-            
+
             lockedPockets.Add(pocket);
+        }
+    }
+    
+    protected override void Update()
+    {
+        // disable timer(user turn based)
+    }
+
+    public void OnTurnEnd()
+    {
+        Deactivate();
+
+        var turnManager = FindObjectOfType<TurnEffectManager>();
+        if (turnManager != null)
+        {
+            turnManager.Unregister(this);
         }
     }
 
@@ -44,7 +68,7 @@ public class PocketLockDownModifier : GameModifier
     {
         Activate();
     }
-    
+
     protected override void OnDeactivate()
     {
         foreach (var pocket in lockedPockets)
@@ -53,11 +77,12 @@ public class PocketLockDownModifier : GameModifier
             {
                 var renderer = pocket.GetComponent<MeshRenderer>();
                 var collider = pocket.GetComponent<CapsuleCollider>();
-                
+
                 if (renderer != null) renderer.enabled = false;
                 if (collider != null) collider.enabled = false;
             }
         }
+
         lockedPockets.Clear();
     }
 }

@@ -16,7 +16,7 @@ namespace Abilities
         
         private void Awake()
         {
-            abilityCost = 1;
+            abilityCost = 0;
         }
 
         public void UseBallSwap()

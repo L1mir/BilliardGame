@@ -20,14 +20,15 @@ public class UIController : MonoBehaviour
 
     [SerializeField] private TextMeshProUGUI current_player_text;
     [SerializeField] private GameObject current_player_panel;
-         
+
     private void Awake()
     {
         Instance = this;
-        if(PlayerPrefs.HasKey("MusicVolume"))
+        if (PlayerPrefs.HasKey("MusicVolume"))
         {
             music_volume_scroll_bar.value = PlayerPrefs.GetFloat("MusicVolume");
         }
+
         LoadVolumeComponentsValues();
 
         if (current_player_panel != null)
@@ -44,7 +45,7 @@ public class UIController : MonoBehaviour
             current_player_panel.SetActive(true);
         }
     }
-    
+
     private void HidePlayerPanel()
     {
         if (current_player_panel != null)
@@ -53,7 +54,7 @@ public class UIController : MonoBehaviour
 
     private void LoadVolumeComponentsValues()
     {
-        if(PlayerPrefs.HasKey("Bloom"))
+        if (PlayerPrefs.HasKey("Bloom"))
             bloom_intensity.value = PlayerPrefs.GetFloat("Bloom");
         if (PlayerPrefs.HasKey("MotionBlur"))
             motionblur_intensity.value = PlayerPrefs.GetFloat("MotionBlur");
@@ -84,7 +85,7 @@ public class UIController : MonoBehaviour
     {
         winning_team_panel.SetActive(true);
         string team_type_string;
-        if(team_type == TeamType.Strip)
+        if (team_type == TeamType.Strip)
         {
             team_type_string = "strip";
         }
@@ -92,6 +93,7 @@ public class UIController : MonoBehaviour
         {
             team_type_string = "solid";
         }
+
         winning_team_text.text = "Winning Team : " + team_type_string;
     }
 }
