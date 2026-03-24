@@ -16,11 +16,12 @@ public class GameController : MonoBehaviour
     private List<GameObject> balls;
     private int currentPlayer = 0;
     private int currentTeam = 0;
-    private float stopThreshold = 0.5f;
-    private float dampingCoefficient = 0.3f;
+    private float stopThreshold = 0.02f;
+    // private float dampingCoefficient = 0.3f;
     private GameObject whiteBall;
     private Vector3 whiteBallStartPosition;
     private bool teamTypesAssigned = false;
+    private bool shouldActivateModifier = false;
     
     [SerializeField] private TurnEffectManager turnEffectManager;
 
@@ -93,6 +94,11 @@ public class GameController : MonoBehaviour
         isMoveInProgress = false;
     }
     
+    public void QueueModifierActivation()
+    {
+        shouldActivateModifier = true;
+    }
+    
     public void ShowCurrentPlayerInfo()
     {
         Player player = GetPlayer();
@@ -136,10 +142,18 @@ public class GameController : MonoBehaviour
         
         balls = new List<GameObject>();
         
+        foreach (var ball in allBalls)
+        {
+            if (ball.GetComponent<BallPhysics>() == null)
+            {
+                ball.AddComponent<BallPhysics>();
+            }
+        }
+        
         if (whiteBall != null && whiteBallStartPos != null)
         {
             whiteBall.transform.position = whiteBallStartPos.transform.position;
-            whiteBall.GetComponent<Rigidbody>().linearDamping = dampingCoefficient;
+            // whiteBall.GetComponent<Rigidbody>().linearDamping = dampingCoefficient;
         }
         else
         {
@@ -154,7 +168,7 @@ public class GameController : MonoBehaviour
         for (int i = 0; i < otherBalls.Length && i < shuffledPositions.Count; i++)
         {
             otherBalls[i].transform.position = shuffledPositions[i].transform.position;
-            otherBalls[i].GetComponent<Rigidbody>().linearDamping = dampingCoefficient;
+            // otherBalls[i].GetComponent<Rigidbody>().linearDamping = dampingCoefficient;
             balls.Add(otherBalls[i]);
         }
     }
@@ -184,9 +198,16 @@ public class GameController : MonoBehaviour
         foreach (var ball in balls)
         {
             if (ball.activeInHierarchy &&
-                (Math.Abs(ball.GetComponent<Rigidbody>().linearVelocity.x) > stopThreshold ||
-                 Math.Abs(ball.GetComponent<Rigidbody>().linearVelocity.y) > stopThreshold ||
-                 Math.Abs(ball.GetComponent<Rigidbody>().linearVelocity.z) > stopThreshold))
+                ball.GetComponent<Rigidbody>().linearVelocity.magnitude > stopThreshold)
+            {
+                return false;
+            }
+        }
+        
+        if (whiteBall != null)
+        {
+            var rb = whiteBall.GetComponent<Rigidbody>();
+            if (rb.linearVelocity.magnitude > stopThreshold)
             {
                 return false;
             }
@@ -219,6 +240,14 @@ public class GameController : MonoBehaviour
         }
     
         GetPlayer().isCurrentPlayer = true;
+        
+        if (shouldActivateModifier)
+        {
+            ModifierManager.Instance?.ActivateRandomModifier();
+            shouldActivateModifier = false;
+        }
+
+        
         ShowCurrentPlayerInfo();
     }
 

@@ -5,16 +5,16 @@ public class MagneticStormModifier : GameModifier
 {
     [SerializeField] private float attractionForce = 50f;
     [SerializeField] private float attractionRadius = 3f;
-    [SerializeField] private Color magneticEffectColor = Color.blue;
+    // [SerializeField] private Color magneticEffectColor = Color.blue;
     
     private List<Rigidbody> allBalls = new List<Rigidbody>();
-    private Dictionary<Rigidbody, Color> originalColors = new Dictionary<Rigidbody, Color>();
+    // private Dictionary<Rigidbody, Color> originalColors = new Dictionary<Rigidbody, Color>();
 
     protected override void OnActivate()
     {
         var balls = GameObject.FindGameObjectsWithTag("Ball");
         allBalls.Clear();
-        originalColors.Clear();
+        // originalColors.Clear();
         
         foreach (var ball in balls)
         {
@@ -22,12 +22,12 @@ public class MagneticStormModifier : GameModifier
             if (rb != null && !ball.CompareTag("WhiteBall"))
             {
                 allBalls.Add(rb);
-                var renderer = ball.GetComponent<Renderer>();
-                if (renderer != null)
-                {
-                    originalColors[rb] = renderer.material.color;
-                    renderer.material.color = Color.Lerp(renderer.material.color, magneticEffectColor, 0.5f);
-                }
+                // var renderer = ball.GetComponent<Renderer>();
+                // if (renderer != null)
+                // {
+                //     originalColors[rb] = renderer.material.color;
+                //     renderer.material.color = Color.Lerp(renderer.material.color, magneticEffectColor, 0.5f);
+                // }
             }
         }
         Debug.Log("MagneticStorm activated! Balls: " + allBalls.Count);
@@ -66,8 +66,8 @@ public class MagneticStormModifier : GameModifier
                     allBalls[i].AddForce(direction.normalized * forceMagnitude, ForceMode.Impulse);
                     allBalls[j].AddForce(-direction.normalized * forceMagnitude, ForceMode.Impulse);
                     
-                    Debug.DrawLine(allBalls[i].position, allBalls[j].position, 
-                        Color.Lerp(Color.blue, Color.red, forceMagnitude / attractionForce));
+                    // Debug.DrawLine(allBalls[i].position, allBalls[j].position, 
+                    //     Color.Lerp(Color.blue, Color.red, forceMagnitude / attractionForce));
                 }
             }
         }
@@ -84,17 +84,17 @@ public class MagneticStormModifier : GameModifier
             }
         }
 
-        foreach (var kvp in originalColors)
-        {
-            if (kvp.Key != null)
-            {
-                var renderer = kvp.Key.GetComponent<Renderer>();
-                if (renderer != null) renderer.material.color = kvp.Value;
-            }
-        }
+        // foreach (var kvp in originalColors)
+        // {
+        //     if (kvp.Key != null)
+        //     {
+        //         var renderer = kvp.Key.GetComponent<Renderer>();
+        //         if (renderer != null) renderer.material.color = kvp.Value;
+        //     }
+        // }
 
         allBalls.Clear();
-        originalColors.Clear();
+        // originalColors.Clear();
     
         Debug.Log("MagneticStorm deactivated!");
     }

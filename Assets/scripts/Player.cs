@@ -19,11 +19,11 @@ public class Player : MonoBehaviour
     [NonSerialized] private float stick_rotation_velocity = 2f;
     [SerializeField] private float smooth_time = 0.1f;
     [SerializeField] private float max_speed = 120f;
-    [SerializeField] private float strike_force = 0.1f;
-    [SerializeField] private float min_force = 0.05f;
-    [SerializeField] private float max_force = 0.3f;
-    [SerializeField] private float force_changing_factor = 0.05f;
-    [SerializeField] private float zoom_changing_factor = 15f;
+    [SerializeField] private float strike_force = 5f;
+    [SerializeField] private float min_force = 2f;
+    [SerializeField] private float max_force = 10f;
+    [SerializeField] private float force_changing_factor = 0.5f;
+    [SerializeField] private float zoom_changing_factor = 10f;
     [SerializeField] private float min_zoom = 10f;
     [SerializeField] private float max_zoom = 120f;
     
@@ -167,7 +167,12 @@ public class Player : MonoBehaviour
         
         dir = Vector3.ProjectOnPlane(dir, Vector3.up).normalized;
         
-        whiteBall.GetComponent<Rigidbody>().AddForce(dir * strike_force, ForceMode.Impulse);
+        Rigidbody rb = whiteBall.GetComponent<Rigidbody>();
+        // rb.linearVelocity = dir * strike_force;
+        // rb.angularVelocity = Vector3.zero;
+        rb.AddForce(dir * strike_force, ForceMode.Impulse);
+        
+        // whiteBall.GetComponent<Rigidbody>().AddForce(dir * strike_force, ForceMode.Impulse);
         
         stick_animator.SetBool("isStroke", false);
         yield return new WaitForSeconds(cooldownAfterStrike);

@@ -54,7 +54,7 @@ public class Counter : MonoBehaviour
 
                 if (ModifierManager.Instance != null)
                 {
-                    ModifierManager.Instance.ActivateRandomModifier();
+                    gc.QueueModifierActivation();
                     Debug.Log("Random Modifier activated");
                 }
             }

@@ -6,10 +6,12 @@ namespace Abilities
     public class GhostBallAbility : Ability, IEndOfTurnEffect
     {
         private Collider whiteBallCollider;
+        private MaterialPropertyBlock mpb;
 
         private void Awake()
         {
             abilityCost = 0;
+            mpb = new MaterialPropertyBlock();
         }
 
         protected override void OnActivate()
@@ -63,11 +65,16 @@ namespace Abilities
                     var renderer = ball.GetComponent<Renderer>();
                     if (renderer != null)
                     {
-                        Color color = renderer.material.color;
-                        color.a = 0.5f;
-                        renderer.material.color = color;
+                        renderer.GetPropertyBlock(mpb);
+
+                        Color color = renderer.sharedMaterial.color;
+                        color.a = 0.4f;
+
+                        mpb.SetColor("_BaseColor", color);
+
+                        renderer.SetPropertyBlock(mpb);
                     }
-                }
+                }   
             }
         }
         
@@ -108,9 +115,14 @@ namespace Abilities
                 var renderer = ball.GetComponent<Renderer>();
                 if (renderer != null)
                 {
-                    Color color = renderer.material.color;
+                    renderer.GetPropertyBlock(mpb);
+
+                    Color color = renderer.sharedMaterial.color;
                     color.a = 1f;
-                    renderer.material.color = color;
+
+                    mpb.SetColor("_BaseColor", color);
+
+                    renderer.SetPropertyBlock(mpb);
                 }
             }
 
