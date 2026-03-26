@@ -6,81 +6,60 @@ namespace Abilities
 {
     public class BallSwapAbility : Ability
     {
-        [Tooltip("Ссылка на белый шар")]
         [SerializeField] private GameObject whiteBall;
-    
+
         private const string SOLID_LAYER = "Solid";
         private const string STRIP_LAYER = "Strip";
         private const string WHITE_BALL_TAG = "WhiteBall";
         private const string BALL_TAG = "Ball";
-        
+
+        private GameController gameController;
+
         private void Awake()
         {
             abilityCost = 0;
+            gameController = FindObjectOfType<GameController>();
         }
 
         public void UseBallSwap()
         {
-            Debug.Log("UseBallSwap called");
-            OnActivate();
+            if (!isActive)
+                Activate();
         }
-        
+
         protected override void OnActivate()
         {
-            GameController gameController = FindObjectOfType<GameController>();
-            Player currentPlayer = gameController.GetPlayer();
-            
-            if (currentPlayer == null) return;
-            if (currentPlayer.AbilityPoints < abilityCost)
-            {
-                Debug.Log("Not enough points!" + currentPlayer.AbilityPoints);
-                return;
-            }
-            
-            currentPlayer.AbilityPoints -= abilityCost;
-            gameController.ShowCurrentPlayerInfo();
-            
-            if (isActive) 
-            {
-                Debug.LogWarning("Ability already active!");
-                return;
-            }
-            
-            isActive = true;
-            Debug.Log("BallSwap ability activated");
-
-            StartCoroutine(SwapBallsCoroutine());
-        }
-
-        private IEnumerator SwapBallsCoroutine()
-        {
-
-            GameController gameController = FindObjectOfType<GameController>();
             if (gameController == null)
             {
                 Debug.LogError("GameController not found!");
                 isActive = false;
-                yield break;
+                return;
             }
 
             Player currentPlayer = gameController.GetPlayer();
             if (currentPlayer == null)
             {
-                Debug.LogError("Current player not found!");
+                Debug.LogError("Player not found!");
                 isActive = false;
-                yield break;
+                return;
             }
 
-            Team currentTeam = currentPlayer.GetTeam();
-            if (currentTeam == null)
+            if (currentPlayer.AbilityPoints < abilityCost)
             {
-                Debug.LogError("Current team not found!");
+                Debug.Log("Not enough points!");
                 isActive = false;
-                yield break;
+                return;
             }
 
-            Debug.Log($"Current team: {currentTeam.GetTeamType()}");
+            currentPlayer.AbilityPoints -= abilityCost;
+            gameController.ShowCurrentPlayerInfo();
 
+            StartCoroutine(SwapCoroutine(currentPlayer));
+        }
+
+        private IEnumerator SwapCoroutine(Player player)
+        {
+            // Найти белый шар если не задан
             if (whiteBall == null)
             {
                 whiteBall = GameObject.FindGameObjectWithTag(WHITE_BALL_TAG);
@@ -92,132 +71,109 @@ namespace Abilities
                 }
             }
 
-            GameObject targetBall = FindValidTeamBall(currentTeam);
+            GameObject targetBall = FindValidTeamBall(player.GetTeam());
+
             if (targetBall == null)
             {
-                Debug.LogWarning("No valid team ball found for swapping!");
+                Debug.LogWarning("No valid ball to swap!");
+                isActive = false;
+                yield break;
+            }
+            
+            if (targetBall == whiteBall)
+            {
+                Debug.LogWarning("Tried to swap with itself!");
                 isActive = false;
                 yield break;
             }
 
-            Debug.Log($"Attempting swap between white ball ({whiteBall.name}) and {targetBall.name}");
+            Rigidbody rb1 = whiteBall.GetComponent<Rigidbody>();
+            Rigidbody rb2 = targetBall.GetComponent<Rigidbody>();
 
-            Collider whiteBallCollider = whiteBall.GetComponent<Collider>();
-            Collider targetBallCollider = targetBall.GetComponent<Collider>();
-            
-            bool whiteColliderWasEnabled = whiteBallCollider != null && whiteBallCollider.enabled;
-            bool targetColliderWasEnabled = targetBallCollider != null && targetBallCollider.enabled;
+            Collider col1 = whiteBall.GetComponent<Collider>();
+            Collider col2 = targetBall.GetComponent<Collider>();
 
-            if (whiteBallCollider != null) whiteBallCollider.enabled = false;
-            if (targetBallCollider != null) targetBallCollider.enabled = false;
+            if (rb1 == null || rb2 == null)
+            {
+                Debug.LogError("Missing Rigidbody!");
+                isActive = false;
+                yield break;
+            }
 
-            PerformInstantSwap(whiteBall, targetBall);
+            if (Vector3.Distance(rb1.position, rb2.position) < 0.001f)
+            {
+                Debug.LogWarning("Balls are too close - swap skipped");
+                isActive = false;
+                yield break;
+            }
 
-            yield return new WaitForSeconds(0.05f);
+            rb1.linearVelocity = Vector3.zero;
+            rb2.linearVelocity = Vector3.zero;
+            rb1.angularVelocity = Vector3.zero;
+            rb2.angularVelocity = Vector3.zero;
 
-            if (whiteBallCollider != null) whiteBallCollider.enabled = whiteColliderWasEnabled;
-            if (targetBallCollider != null) targetBallCollider.enabled = targetColliderWasEnabled;
+            rb1.isKinematic = true;
+            rb2.isKinematic = true;
 
-            Debug.Log($"Swap completed successfully! White ball at: {whiteBall.transform.position}, Target ball at: {targetBall.transform.position}");
+            if (col1 != null) col1.enabled = false;
+            if (col2 != null) col2.enabled = false;
+
+            yield return null;
+
+            Vector3 pos1 = rb1.position;
+            Vector3 pos2 = rb2.position;
+
+            Quaternion rot1 = rb1.rotation;
+            Quaternion rot2 = rb2.rotation;
+
+            rb1.position = pos2;
+            rb2.position = pos1;
+
+            rb1.rotation = rot2;
+            rb2.rotation = rot1;
+
+            Physics.SyncTransforms();
+
+            yield return new WaitForSeconds(0.02f);
+
+            rb1.isKinematic = false;
+            rb2.isKinematic = false;
+
+            rb1.linearVelocity = Vector3.zero;
+            rb2.linearVelocity = Vector3.zero;
+            rb1.angularVelocity = Vector3.zero;
+            rb2.angularVelocity = Vector3.zero;
+
+            if (col1 != null) col1.enabled = true;
+            if (col2 != null) col2.enabled = true;
 
             isActive = false;
         }
 
-        private GameObject FindValidTeamBall(Team currentTeam)
+        private GameObject FindValidTeamBall(Team team)
         {
-            string targetLayer = currentTeam.GetTeamType() == TeamType.Solid ? SOLID_LAYER : STRIP_LAYER;
-            int targetLayerMask = LayerMask.NameToLayer(targetLayer);
+            string layerName = team.GetTeamType() == TeamType.Solid ? SOLID_LAYER : STRIP_LAYER;
+            int layer = LayerMask.NameToLayer(layerName);
 
-            Debug.Log($"Looking for balls in layer: {targetLayer} (mask: {targetLayerMask})");
+            GameObject[] balls = GameObject.FindGameObjectsWithTag(BALL_TAG);
+            List<GameObject> valid = new List<GameObject>();
 
-            GameObject[] allBalls = GameObject.FindGameObjectsWithTag(BALL_TAG);
-            Debug.Log($"Found {allBalls.Length} balls with tag {BALL_TAG}");
-
-            List<GameObject> validBalls = new List<GameObject>();
-
-            foreach (GameObject ball in allBalls)
+            foreach (var ball in balls)
             {
                 if (ball == null) continue;
-                
-                Debug.Log($"Checking ball: {ball.name}, Layer: {ball.layer}, Tag: {ball.tag}, Active: {ball.activeInHierarchy}");
 
-                if (ball != whiteBall && 
-                    !ball.CompareTag(WHITE_BALL_TAG) && 
-                    ball.layer == targetLayerMask &&
+                if (ball != whiteBall &&
+                    !ball.CompareTag(WHITE_BALL_TAG) &&
+                    ball.layer == layer &&
                     ball.activeInHierarchy)
                 {
-                    validBalls.Add(ball);
-                    Debug.Log($"Valid ball found: {ball.name}");
+                    valid.Add(ball);
                 }
             }
 
-            Debug.Log($"Found {validBalls.Count} valid balls for team {targetLayer}");
-            
-            if (validBalls.Count == 0)
-            {
-                Debug.LogWarning($"No balls found for team: {targetLayer}");
-                return null;
-            }
+            if (valid.Count == 0) return null;
 
-            GameObject selectedBall = validBalls[Random.Range(0, validBalls.Count)];
-            Debug.Log($"Selected ball for swap: {selectedBall.name}");
-            return selectedBall;
+            return valid[Random.Range(0, valid.Count)];
         }
-
-        private void PerformInstantSwap(GameObject ball1, GameObject ball2)
-        {
-            if (ball1 == null || ball2 == null)
-            {
-                Debug.LogError("One of the balls is null in swap!");
-                return;
-            }
-
-            Debug.Log($"Swapping positions: {ball1.name} at {ball1.transform.position} with {ball2.name} at {ball2.transform.position}");
-
-            Vector3 pos1 = ball1.transform.position;
-            Vector3 pos2 = ball2.transform.position;
-            Quaternion rot1 = ball1.transform.rotation;
-            Quaternion rot2 = ball2.transform.rotation;
-
-            StopAllPhysics(ball1);
-            StopAllPhysics(ball2);
-
-            ball1.transform.SetPositionAndRotation(pos2, rot2);
-            ball2.transform.SetPositionAndRotation(pos1, rot1);
-
-            Debug.Log($"After swap: {ball1.name} at {ball1.transform.position}, {ball2.name} at {ball2.transform.position}");
-        }
-
-        private void StopAllPhysics(GameObject ball)
-        {
-            Rigidbody rb = ball.GetComponent<Rigidbody>();
-            if (rb != null)
-            {
-                rb.linearVelocity = Vector3.zero;
-                rb.angularVelocity = Vector3.zero;
-                
-                if (!rb.isKinematic)
-                {
-                    rb.isKinematic = true;
-                    StartCoroutine(ReenablePhysicsAfterDelay(rb, 0.1f));
-                }
-                else
-                {
-                    rb.Sleep();
-                }
-            }
-        }
-
-        private IEnumerator ReenablePhysicsAfterDelay(Rigidbody rb, float delay)
-        {
-            yield return new WaitForSeconds(delay);
-            if (rb != null)
-            {
-                rb.isKinematic = false;
-                rb.linearVelocity = Vector3.zero;
-                rb.angularVelocity = Vector3.zero;
-            }
-        }
-        
     }
 }

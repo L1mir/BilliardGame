@@ -7,99 +7,148 @@ public class AnchoredChaosModifier : GameModifier, IEndOfTurnEffect
     [SerializeField] private int minAnchoredBalls = 2;
     [SerializeField] private int maxAnchoredBalls = 5;
     [SerializeField] private Color anchoredColor = Color.gray;
-    
-    private Dictionary<Rigidbody, Color> originalBalls = new Dictionary<Rigidbody, Color>();
-    private List<Rigidbody> allBalls = new List<Rigidbody>();
-    
+
+    private readonly Dictionary<Rigidbody, BallStateData> anchoredBalls = new();
+    private readonly List<Rigidbody> availableBalls = new();
+    private static readonly int ColorID = Shader.PropertyToID("_Color");
+    private MaterialPropertyBlock propBlock;
+
+    private TurnEffectManager turnManager;
+
+    private struct BallStateData
+    {
+        public Color originalColor;
+        public RigidbodyConstraints originalConstraints;
+        public Vector3 originalVelocity;
+        public Vector3 originalAngularVelocity;
+        public Renderer renderer;
+    }
+
     public void UseModifier()
     {
         Activate();
     }
-    
+
+    protected void Awake()
+    {
+        turnManager = FindObjectOfType<TurnEffectManager>();
+    }
+
     protected override void Update()
     {
-        // disable timer(user turn based)
+        // turn-based, ничего не делаем
     }
-    
+
     protected override void OnActivate()
     {
-        FindObjectOfType<TurnEffectManager>().Register(this);
-        
+        if (turnManager != null)
+            turnManager.Register(this);
+
+        anchoredBalls.Clear();
+        availableBalls.Clear();
+
         var balls = GameObject.FindGameObjectsWithTag("Ball");
-        allBalls.Clear();
-        
+
         foreach (var ball in balls)
         {
+            if (ball.CompareTag("WhiteBall")) continue;
+
             var rb = ball.GetComponent<Rigidbody>();
-            if (rb != null && !ball.CompareTag("WhiteBall"))
-            {
-                allBalls.Add(rb);
-            }
+            if (rb == null) continue;
+
+            availableBalls.Add(rb);
         }
-        
-        int ballsToAnchor = Mathf.Min(Random.Range(minAnchoredBalls, maxAnchoredBalls + 1), allBalls.Count);
-        
-        for (int i = 0; i < ballsToAnchor; i++)
+
+        if (availableBalls.Count == 0) return;
+
+        int count = Mathf.Min(
+            Random.Range(minAnchoredBalls, maxAnchoredBalls + 1),
+            availableBalls.Count
+        );
+
+        for (int i = 0; i < count; i++)
         {
-            if (allBalls.Count == 0) break;
-            
-            int randomIndex = Random.Range(0, allBalls.Count);
-            Rigidbody ballRb = allBalls[randomIndex];
+            int index = Random.Range(0, availableBalls.Count);
+            var rb = availableBalls[index];
+            availableBalls.RemoveAt(index);
 
-            var renderer = ballRb.GetComponent<Renderer>();
-            if (renderer != null)
-            {
-                originalBalls[ballRb] = renderer.material.color;
-                renderer.material.color = anchoredColor;
-            }
+            if (rb == null) continue;
 
-            ballRb.isKinematic = true;
-            
-            allBalls.RemoveAt(randomIndex);
+            AnchorBall(rb);
         }
     }
-    
+
+    private void AnchorBall(Rigidbody rb)
+    {
+        if (anchoredBalls.ContainsKey(rb)) return;
+
+        var renderer = rb.GetComponent<Renderer>();
+        var physics = rb.GetComponent<BallPhysics>();
+
+        if (physics == null)
+        {
+            Debug.LogWarning("BallPhysics missing!");
+            return;
+        }
+
+        BallStateData data = new BallStateData
+        {
+            originalConstraints = rb.constraints,
+            originalVelocity = rb.linearVelocity,
+            originalAngularVelocity = rb.angularVelocity,
+            renderer = renderer,
+            originalColor = renderer != null ? renderer.material.color : Color.white
+        };
+
+        anchoredBalls.Add(rb, data);
+        
+        physics.isAnchored = true;
+
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+
+        if (renderer != null)
+        {
+            if (propBlock == null) propBlock = new MaterialPropertyBlock();
+            renderer.GetPropertyBlock(propBlock);
+            propBlock.SetColor("_BaseColor", anchoredColor);
+            renderer.SetPropertyBlock(propBlock);
+        }
+    }
+
     public void OnTurnEnd()
     {
         Deactivate();
-        FindObjectOfType<TurnEffectManager>().Unregister(this);
+
+        if (turnManager != null)
+            turnManager.Unregister(this);
     }
-    
-    private System.Collections.IEnumerator UnanchorBallAfterDelay(Rigidbody ballRb, float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        
-        if (ballRb != null && originalBalls.ContainsKey(ballRb))
-        {
-            ballRb.isKinematic = false;
-            
-            var renderer = ballRb.GetComponent<Renderer>();
-            if (renderer != null)
-            {
-                renderer.material.color = originalBalls[ballRb];
-            }
-            
-            originalBalls.Remove(ballRb);
-        }
-    }
-    
+
     protected override void OnDeactivate()
     {
-        foreach (var kvp in originalBalls)
+        foreach (var kvp in anchoredBalls)
         {
-            if (kvp.Key != null)
+            var rb = kvp.Key;
+            var data = kvp.Value;
+
+            if (rb == null) continue;
+
+            var physics = rb.GetComponent<BallPhysics>();
+
+            if (physics != null)
+                physics.isAnchored = false;
+
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+
+            if (data.renderer != null)
             {
-                kvp.Key.isKinematic = false;
-                
-                var renderer = kvp.Key.GetComponent<Renderer>();
-                if (renderer != null)
-                {
-                    renderer.material.color = kvp.Value;
-                }
+                data.renderer.GetPropertyBlock(propBlock);
+                propBlock.SetColor("_BaseColor", data.originalColor);
+                data.renderer.SetPropertyBlock(propBlock);
             }
         }
-        
-        originalBalls.Clear();
-        StopAllCoroutines();
+
+        anchoredBalls.Clear();
     }
 }

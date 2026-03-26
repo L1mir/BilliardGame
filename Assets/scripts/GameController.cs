@@ -16,8 +16,7 @@ public class GameController : MonoBehaviour
     private List<GameObject> balls;
     private int currentPlayer = 0;
     private int currentTeam = 0;
-    private float stopThreshold = 0.02f;
-    // private float dampingCoefficient = 0.3f;
+    private float stopThreshold = 0.03f;
     private GameObject whiteBall;
     private Vector3 whiteBallStartPosition;
     private bool teamTypesAssigned = false;
@@ -135,7 +134,7 @@ public class GameController : MonoBehaviour
 
     private void InitializeBalls()
     {
-        var whiteBall = GameObject.FindGameObjectWithTag("WhiteBall");
+        whiteBall = GameObject.FindGameObjectWithTag("WhiteBall");
         var whiteBallStartPos = GameObject.FindGameObjectWithTag("WhiteBallStartPosition");
         var ballPositions = GameObject.FindGameObjectsWithTag("StartPosition");
         var allBalls = GameObject.FindGameObjectsWithTag("Ball");
