@@ -9,6 +9,7 @@ TagManager:
   - WhiteBall
   - WhiteBallStartPosition
   - Pocket
+  - BlackBall
   layers:
   - Default
   - TransparentFX

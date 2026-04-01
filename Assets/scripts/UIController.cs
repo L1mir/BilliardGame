@@ -37,11 +37,11 @@ public class UIController : MonoBehaviour
         }
     }
 
-    public void ShowCurrentPlayer(string teamName, int abilityPoints)
+    public void ShowCurrentPlayer(string teamName, int abilityPoints, int teamScore)
     {
         if (current_player_text != null && current_player_panel != null)
         {
-            current_player_text.text = $"{teamName}: " + abilityPoints.ToString();
+            current_player_text.text = $"{teamName} score: " + abilityPoints.ToString() + $" AP: {abilityPoints}: ";
             current_player_panel.SetActive(true);
         }
     }

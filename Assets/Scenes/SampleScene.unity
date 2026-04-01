@@ -458,7 +458,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 18.6
+  m_fontSize: 25.4
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -820,7 +820,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 1287, y: -321}
+  m_AnchoredPosition: {x: 1264, y: -218}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0, y: 0}
 --- !u!114 &84067197
@@ -4059,7 +4059,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: -172, y: 39.461}
+  m_AnchoredPosition: {x: -172, y: 141}
   m_SizeDelta: {x: 98.32172, y: 166.6741}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &798187792
@@ -6582,7 +6582,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 0}
   m_Direction: 2
   m_Value: 1
-  m_Size: 1
+  m_Size: 0.9999453
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -6951,7 +6951,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.09388836}
   m_AnchorMax: {x: 1, y: 0.952}
-  m_AnchoredPosition: {x: 0, y: 53.352844}
+  m_AnchoredPosition: {x: 0, y: 53.299595}
   m_SizeDelta: {x: 0, y: -105.7809}
   m_Pivot: {x: 0, y: 1}
 --- !u!1 &1424499848
@@ -8933,6 +8933,7 @@ MonoBehaviour:
   - {fileID: 440190102}
   - {fileID: 1726407713}
   turnEffectManager: {fileID: 339035502}
+  scoredThisTurn: 0
 --- !u!65 &1709340129
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -13923,9 +13924,9 @@ GameObject:
   - component: {fileID: 3035579756335191750}
   - component: {fileID: 9166221257545667321}
   - component: {fileID: 9166221257545667320}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: Ball8(black)
-  m_TagString: Ball
+  m_TagString: BlackBall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

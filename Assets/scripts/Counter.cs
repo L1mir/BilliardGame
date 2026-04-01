@@ -5,7 +5,7 @@ public class Counter : MonoBehaviour
     private GameController gc;
     private GameFinisher gameFinisher;
 
-    void Start()
+    private void Start()
     {
         gc = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
         gameFinisher = GetComponent<GameFinisher>();
@@ -13,60 +13,69 @@ public class Counter : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Ball"))
+        if (gc == null)
         {
-            if (gc != null)
+            Debug.LogError("GameController is null in Counter!");
+            return;
+        }
+
+        if (other.CompareTag("BlackBall"))
+        {
+            Player currentPlayer = gc.GetPlayer();
+            Team currentTeam = currentPlayer.GetTeam();
+            Team otherTeam = gc.GetOtherTeam(currentTeam);
+            if (currentTeam.IsScoredEveryOwnTypeBall())
             {
-                Player currentPlayer = gc.GetPlayer();
-                Team currentTeam = currentPlayer.GetTeam();
-                Team otherTeam = gc.GetOtherTeam(currentTeam);
-
-                TeamType ballType = (TeamType)other.gameObject.layer;
-
-                if (!gc.AreTeamTypesAssigned)
-                {
-                    gc.AssignTeamTypes(currentTeam, ballType);
-                }
-
-                TeamType currentTeamType = currentTeam.GetTeamType();
-
-                if (ballType == currentTeamType)
-                {
-                    currentPlayer.AbilityPoints += 1;
-                    Debug.Log("Current player points:" + currentPlayer.AbilityPoints);
-
-                    currentPlayer.IncrementBallsScored();
-                    currentTeam.IncrementScore();
-
-                    Debug.Log(currentTeam.name + " " + currentTeam.BallsOwnTypeScored);
-
-                    if (currentTeam.IsScoredEveryOwnTypeBall())
-                    {
-                        StartCoroutine(gameFinisher.FinishGame(currentTeam));
-                    }
-                }
-                else
-                {
-                    otherTeam.IncrementScore();
-                }
-                
-                gc.RemoveBall(other.gameObject);
-
-                if (ModifierManager.Instance != null)
-                {
-                    gc.QueueModifierActivation();
-                    Debug.Log("Random Modifier activated");
-                }
+                Debug.Log("WIN: black ball last");
+                StartCoroutine(gameFinisher.FinishGame(currentTeam));
             }
             else
             {
-                Debug.LogError("Error , gamecontroller null");
+                Debug.Log("LOSE: black ball too early");
+                StartCoroutine(gameFinisher.FinishGame(otherTeam));
+            }
+
+            gc.RemoveBall(other.gameObject);
+            return;
+        }
+
+        if (other.CompareTag("Ball"))
+        {
+            Player currentPlayer = gc.GetPlayer();
+            Team currentTeam = currentPlayer.GetTeam();
+            TeamType ballType = (TeamType)other.gameObject.layer;
+            if (!gc.AreTeamTypesAssigned)
+            {
+                gc.AssignTeamTypes(currentTeam, ballType);
+            }
+
+            Team scoringTeam = gc.GetTeamByType(ballType);
+            if (scoringTeam != null)
+            {
+                scoringTeam.IncrementScore();
+                for (int i = 0; i < scoringTeam.Size; i++)
+                {
+                    scoringTeam.GetPlayer(i).AbilityPoints = scoringTeam.BallsOwnTypeScored;
+                }
+
+                if (scoringTeam == currentTeam)
+                {
+                    currentPlayer.IncrementBallsScored();
+                }
+
+                gc.ShowCurrentPlayerInfo();
+            }
+
+            gc.RemoveBall(other.gameObject);
+            if (ModifierManager.Instance != null)
+            {
+                gc.QueueModifierActivation();
             }
         }
         else if (other.CompareTag("WhiteBall"))
         {
-            var whiteBall = other.gameObject;
-            var whiteBallStartPos = GameObject.FindGameObjectWithTag("WhiteBallStartPosition");
+            GameObject whiteBall = other.gameObject;
+            GameObject whiteBallStartPos = GameObject.FindGameObjectWithTag("WhiteBallStartPosition");
             if (whiteBall != null && whiteBallStartPos != null)
             {
                 Rigidbody rb = whiteBall.GetComponent<Rigidbody>();

@@ -23,6 +23,8 @@ public class GameController : MonoBehaviour
     private bool shouldActivateModifier = false;
     
     [SerializeField] private TurnEffectManager turnEffectManager;
+    
+    public bool scoredThisTurn = false;
 
     public Team GetOtherTeam(Team team)
     {
@@ -113,7 +115,8 @@ public class GameController : MonoBehaviour
             teamName = "unknown";
 
         int abilityPoints = player.AbilityPoints;
-        UIController.Instance?.ShowCurrentPlayer(teamName, abilityPoints);
+        int teamScore = team.BallsOwnTypeScored;
+        UIController.Instance?.ShowCurrentPlayer(teamName, abilityPoints, teamScore);
     }
 
     public Player GetPlayer(int index = -1,int team = -1)
@@ -245,7 +248,6 @@ public class GameController : MonoBehaviour
             ModifierManager.Instance?.ActivateRandomModifier();
             shouldActivateModifier = false;
         }
-
         
         ShowCurrentPlayerInfo();
     }
