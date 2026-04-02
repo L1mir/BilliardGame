@@ -152,6 +152,17 @@ public class GameController : MonoBehaviour
             }
         }
         
+        if (whiteBall != null && whiteBall.GetComponent<BallPhysics>() == null)
+        {
+            whiteBall.AddComponent<BallPhysics>();
+        }
+
+        GameObject blackBall = GameObject.FindGameObjectWithTag("BlackBall");
+        if (blackBall != null && blackBall.GetComponent<BallPhysics>() == null)
+        {
+            blackBall.AddComponent<BallPhysics>();
+        }
+        
         if (whiteBall != null && whiteBallStartPos != null)
         {
             whiteBall.transform.position = whiteBallStartPos.transform.position;
