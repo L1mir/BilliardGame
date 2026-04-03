@@ -8,12 +8,12 @@ public class BallPhysics : MonoBehaviour
     [Header("Physical Properties")]
     [SerializeField] private float radius = 0.028f;
     [SerializeField] private float mass = 0.01f;
-    [SerializeField] private float rollingFrictionCoeff = 0.02f;
-    [SerializeField] private float stopThreshold = 0.05f;
+    [SerializeField] private float rollingFrictionCoeff = 0.008f;
+    [SerializeField] private float stopThreshold = 0.03f;
     
     [Header("Ground Properties")]
     [SerializeField] private float groundNormalForce = 9.81f;
-    [SerializeField] private float airResistance = 0.99f;
+    [SerializeField] private float airResistance = 0.998f;
     
     private void Awake()
     {
@@ -65,7 +65,7 @@ public class BallPhysics : MonoBehaviour
             if (speed > 0.01f)
             {
                 Vector3 desiredAngularVelocity = Vector3.Cross(Vector3.up, velocity.normalized) * (speed / radius);
-                rb.angularVelocity = Vector3.Lerp(rb.angularVelocity, desiredAngularVelocity, 0.1f);
+                rb.angularVelocity = Vector3.Lerp(rb.angularVelocity, desiredAngularVelocity, 0.07f);
             }
             
             rb.linearVelocity = velocity;
