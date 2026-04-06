@@ -170,6 +170,9 @@ public class Player : MonoBehaviour
 
         stick_animator.SetBool("isStroke", true);
         yield return new WaitForSeconds(strikeAnimationTime);
+        
+        UIController.Instance?.HideAll();
+        CameraSwitcher.Instance?.SwitchToTopDown();
 
         Vector3 dir = -stick_prefab.transform.forward;
         dir = Vector3.ProjectOnPlane(dir, Vector3.up).normalized;
@@ -177,7 +180,7 @@ public class Player : MonoBehaviour
         Rigidbody rb = whiteBall.GetComponent<Rigidbody>();
 
         rb.linearVelocity = Vector3.zero;
-        rb.angularVelocity = Vector3.zero;
+        rb.angularVelocity = -dir * (strike_force * 1.5f);
 
         rb.linearVelocity = dir * strike_force;
 
@@ -191,6 +194,10 @@ public class Player : MonoBehaviour
         stick_prefab.SetActive(false);
 
         yield return new WaitUntil(() => gc.IsReadyToMove());
+        
+        UIController.Instance?.ShowAll();
+        
+        CameraSwitcher.Instance?.SwitchToFollow();
 
         isStroke = false;
         gc.NextMove();

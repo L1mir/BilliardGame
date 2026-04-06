@@ -20,6 +20,8 @@ public class UIController : MonoBehaviour
 
     [SerializeField] private TextMeshProUGUI current_player_text;
     [SerializeField] private GameObject current_player_panel;
+    
+    [SerializeField] private Canvas mainCanvas;
 
     private void Awake()
     {
@@ -95,5 +97,17 @@ public class UIController : MonoBehaviour
         }
 
         winning_team_text.text = "Winning Team : " + team_type_string;
+    }
+    
+    public void HideAll()
+    {
+        if (mainCanvas != null)
+            mainCanvas.enabled = false;
+    }
+
+    public void ShowAll()
+    {
+        if (mainCanvas != null)
+            mainCanvas.enabled = true;
     }
 }
