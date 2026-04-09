@@ -43,7 +43,7 @@ public class UIController : MonoBehaviour
     {
         if (current_player_text != null && current_player_panel != null)
         {
-            current_player_text.text = $"{teamName} score: " + abilityPoints.ToString() + $" AP: {abilityPoints}: ";
+            current_player_text.text = $"{teamName}: " + abilityPoints.ToString() + $" Очки способностей: {abilityPoints}: ";
             current_player_panel.SetActive(true);
         }
     }

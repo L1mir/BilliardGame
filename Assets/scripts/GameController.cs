@@ -108,9 +108,9 @@ public class GameController : MonoBehaviour
 
         string teamName;
         if (type == TeamType.Strip)
-            teamName = "stripes";
+            teamName = "Полосатые";
         else if (type == TeamType.Solid)
-            teamName = "solids";
+            teamName = "Сплошные";
         else
             teamName = "unknown";
 
