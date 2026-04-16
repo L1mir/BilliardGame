@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -18,10 +19,22 @@ public class UIController : MonoBehaviour
     [SerializeField] private Scrollbar motionblur_intensity;
     [SerializeField] private Toggle tonemapping_enabled;
 
-    [SerializeField] private TextMeshProUGUI current_player_text;
+    [Header("Current Player UI")]
+    [SerializeField] private TextMeshProUGUI teamNameText;      // TeamText
+    [SerializeField] private TextMeshProUGUI scoreLabelText;    // ScoreLabel (НОВЫЙ)
+    [SerializeField] private TextMeshProUGUI scoreText;         // ScoreValue
+    [SerializeField] private TextMeshProUGUI abilityLabelText;  // AbilityLabel
+    [SerializeField] private TextMeshProUGUI abilityPointsText; // AbilityValue
     [SerializeField] private GameObject current_player_panel;
     
     [SerializeField] private Canvas mainCanvas;
+    
+    [Header("Modifier Notification")]
+    [SerializeField] private GameObject modifierNotificationPanel;
+    [SerializeField] private TextMeshProUGUI modifierTitleText;
+    [SerializeField] private TextMeshProUGUI modifierDescriptionText;
+    [SerializeField] private float notificationDuration = 2f;
+    private Coroutine notificationCoroutine;
 
     private void Awake()
     {
@@ -41,10 +54,53 @@ public class UIController : MonoBehaviour
 
     public void ShowCurrentPlayer(string teamName, int abilityPoints, int teamScore)
     {
-        if (current_player_text != null && current_player_panel != null)
+        if (current_player_panel != null)
         {
-            current_player_text.text = $"{teamName}: " + abilityPoints.ToString() + $" Очки способностей: {abilityPoints}: ";
+            if (teamNameText != null)
+            {
+                string displayTeamName = teamName == "Strip" ? "ПОЛОСАТЫЕ" : 
+                    teamName == "Solid" ? "ЦЕЛЬНЫЕ" : 
+                    "НЕТ КОМАНДЫ";
+                teamNameText.text = $"{displayTeamName}";
+            }
+            
+            if (scoreLabelText != null)
+            {
+                scoreLabelText.text = "СЧЕТ:";
+            }
+        
+            if (scoreText != null)
+            {
+                scoreText.text = $"{teamScore}";
+            }
+        
+            if (abilityLabelText != null)
+            {
+                abilityLabelText.text = "ОЧКИ СПОСОБНОСТЕЙ:";
+            }
+            
+            if (abilityPointsText != null)
+            {
+                abilityPointsText.text = $"{abilityPoints}";
+            }
+        
             current_player_panel.SetActive(true);
+        }
+    }
+    
+    public void UpdateAbilityPoints(int newPoints)
+    {
+        if (abilityPointsText != null)
+        {
+            abilityPointsText.text = $"{newPoints}";
+        }
+    }
+    
+    public void UpdateScore(int newScore)
+    {
+        if (scoreText != null)
+        {
+            scoreText.text = $"{newScore}";
         }
     }
 
@@ -109,5 +165,59 @@ public class UIController : MonoBehaviour
     {
         if (mainCanvas != null)
             mainCanvas.enabled = true;
+    }
+    
+    public void ShowModifierNotification(string title, string description)
+    {
+        if (modifierNotificationPanel == null || modifierTitleText == null || modifierDescriptionText == null)
+        {
+            Debug.LogWarning("Modifier notification UI elements not assigned!");
+            return;
+        }
+  
+        if (notificationCoroutine != null)
+        {
+            StopCoroutine(notificationCoroutine);
+        }
+        
+        modifierTitleText.text = title;
+        modifierDescriptionText.text = description;
+
+        notificationCoroutine = StartCoroutine(ShowNotificationCoroutine());
+    }
+
+    private IEnumerator ShowNotificationCoroutine()
+    {
+        CanvasGroup canvasGroup = modifierNotificationPanel.GetComponent<CanvasGroup>();
+        if (canvasGroup == null)
+        {
+            canvasGroup = modifierNotificationPanel.AddComponent<CanvasGroup>();
+        }
+
+        modifierNotificationPanel.SetActive(true);
+
+        float elapsedTime = 0f;
+        float fadeInDuration = 0.2f;
+        while (elapsedTime < fadeInDuration)
+        {
+            canvasGroup.alpha = Mathf.Lerp(0, 1, elapsedTime / fadeInDuration);
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+        canvasGroup.alpha = 1;
+        
+        yield return new WaitForSeconds(notificationDuration);
+
+        elapsedTime = 0f;
+        float fadeOutDuration = 0.2f;
+        while (elapsedTime < fadeOutDuration)
+        {
+            canvasGroup.alpha = Mathf.Lerp(1, 0, elapsedTime / fadeOutDuration);
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+        canvasGroup.alpha = 0;
+
+        modifierNotificationPanel.SetActive(false);
     }
 }

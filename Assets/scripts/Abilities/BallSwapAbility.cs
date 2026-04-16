@@ -39,14 +39,12 @@ namespace Abilities
             Player currentPlayer = gameController.GetPlayer();
             if (currentPlayer == null)
             {
-                Debug.LogError("Player not found!");
                 isActive = false;
                 return;
             }
 
             if (currentPlayer.AbilityPoints < abilityCost)
             {
-                Debug.Log("Not enough points!");
                 isActive = false;
                 return;
             }
@@ -65,7 +63,6 @@ namespace Abilities
                 whiteBall = GameObject.FindGameObjectWithTag(WHITE_BALL_TAG);
                 if (whiteBall == null)
                 {
-                    Debug.LogError("White ball not found!");
                     isActive = false;
                     yield break;
                 }
@@ -75,14 +72,12 @@ namespace Abilities
 
             if (targetBall == null)
             {
-                Debug.LogWarning("No valid ball to swap!");
                 isActive = false;
                 yield break;
             }
             
             if (targetBall == whiteBall)
             {
-                Debug.LogWarning("Tried to swap with itself!");
                 isActive = false;
                 yield break;
             }

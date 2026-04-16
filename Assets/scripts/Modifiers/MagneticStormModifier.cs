@@ -30,7 +30,6 @@ public class MagneticStormModifier : GameModifier
                 // }
             }
         }
-        Debug.Log("MagneticStorm activated! Balls: " + allBalls.Count);
     }
 
     public void UseMagneticStorm()
@@ -95,7 +94,5 @@ public class MagneticStormModifier : GameModifier
 
         allBalls.Clear();
         // originalColors.Clear();
-    
-        Debug.Log("MagneticStorm deactivated!");
     }
 }

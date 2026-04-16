@@ -23,7 +23,6 @@ public class ModifierManager : MonoBehaviour
     {
         if (availableModifiers == null || availableModifiers.Length == 0)
         {
-            Debug.LogError("No modifiers assigned in ModifierManager!");
             return;
         }
 
@@ -33,7 +32,6 @@ public class ModifierManager : MonoBehaviour
         if (modifier != null && !modifier.IsActive)
         {
             modifier.Activate();
-            Debug.Log($"Activated modifier: {modifier.ModifierName}");
         }
     }
 }

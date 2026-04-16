@@ -3,6 +3,7 @@ using UnityEngine;
 public abstract class GameModifier : MonoBehaviour
 {
     [SerializeField] private string modifierName;
+    [SerializeField, TextArea(2, 4)] private string description;
     [SerializeField] private float duration = 10f;
     [SerializeField] private Sprite icon;
     
@@ -10,6 +11,8 @@ public abstract class GameModifier : MonoBehaviour
     private bool isActive;
 
     public string ModifierName => modifierName;
+    
+    public string Description => description;
     public Sprite Icon => icon;
     public float RemainingTime => remainingTime;
     public bool IsActive => isActive;
@@ -19,6 +22,12 @@ public abstract class GameModifier : MonoBehaviour
         if (isActive) return;
         isActive = true;
         remainingTime = duration;
+        
+        if (UIController.Instance != null)
+        {
+            UIController.Instance.ShowModifierNotification(modifierName, description);
+        }
+        
         OnActivate();
     }
 

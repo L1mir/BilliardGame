@@ -14,7 +14,6 @@ namespace Abilities
         protected virtual bool Activate()
         {
             isActive = true;
-            Debug.Log("Способность активирована!");
             OnActivate();
             return true;
         }

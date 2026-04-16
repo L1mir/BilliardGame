@@ -50,6 +50,12 @@ public class GameController : MonoBehaviour
         InitializeBalls();
         GetPlayer().isCurrentPlayer = true;
     }
+    
+    void Start()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+    }
 
     private void Update()
     {
@@ -106,13 +112,25 @@ public class GameController : MonoBehaviour
         Team team = player.GetTeam();
         TeamType type = team.GetTeamType();
 
+        Debug.Log($"TeamType raw value: {(int)type}, enum: {type}");
+    
         string teamName;
         if (type == TeamType.Strip)
-            teamName = "Полосатые";
+        {
+            teamName = "Strip";
+        }
         else if (type == TeamType.Solid)
-            teamName = "Сплошные";
+        {
+            teamName = "Solid";
+        }
+        else if (type == TeamType.Unknown)
+        {
+            teamName = "Unknown";
+        }
         else
-            teamName = "unknown";
+        {
+            teamName = "Unknown";
+        }
 
         int abilityPoints = player.AbilityPoints;
         int teamScore = team.BallsOwnTypeScored;

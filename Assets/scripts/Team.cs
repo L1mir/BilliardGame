@@ -37,7 +37,6 @@ public class Team : MonoBehaviour
     
     public TeamType GetTeamType()
     {
-        Debug.Log((int)teamType);
         return teamType;
     }
 }

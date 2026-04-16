@@ -31,7 +31,6 @@ namespace Abilities
 
             if (currentPlayer.AbilityPoints < abilityCost)
             {
-                Debug.Log("Ghost Ball points declined");
                 return;
             }
 
@@ -92,7 +91,6 @@ namespace Abilities
         public void ActivateGhostBall()
         {
             if (isActive) return;
-            Debug.Log("ActivateGhostBall вызван");
             Activate();
         }
 

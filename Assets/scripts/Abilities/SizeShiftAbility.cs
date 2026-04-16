@@ -12,7 +12,6 @@ namespace Abilities
 
         protected override void OnActivate()
         {
-            Debug.Log("SizeShift OnActivate вызван");
 
             var turnManager = FindObjectOfType<TurnEffectManager>();
             if (turnManager != null)
@@ -48,14 +47,10 @@ namespace Abilities
                     rb.angularDamping *= 0.9f;
                 }
             }
-
-            Debug.Log("SizeShift применён");
         }
 
         public void ActivateSizeShiftAbility()
         {
-            Debug.Log("Кнопка способности нажата");
-
             if (isActive) return;
 
             Activate();
@@ -96,8 +91,6 @@ namespace Abilities
 
             originalValues.Clear();
             isActive = false;
-
-            Debug.Log("SizeShift сброшен");
         }
 
         private void OnDisable()
