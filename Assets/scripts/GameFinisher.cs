@@ -12,7 +12,13 @@ public class GameFinisher : MonoBehaviour
 
         isGameFinished = true;
 
+        Time.timeScale = 0f;
+
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+        
+        UIController.Instance?.ShowAll();
+
         UIController.Instance.SetWinningTeamText(winningTeam.GetTeamType());
-        yield return new WaitForSeconds(timeAfterWinning);
     }
 }

@@ -53,18 +53,11 @@ public class Counter : MonoBehaviour
             if (scoringTeam != null)
             {
                 scoringTeam.IncrementScore();
-                for (int i = 0; i < scoringTeam.Size; i++)
-                {
-                    scoringTeam.GetPlayer(i).AbilityPoints = scoringTeam.BallsOwnTypeScored;
-                }
-
-                if (scoringTeam == currentTeam)
-                {
-                    currentPlayer.IncrementBallsScored();
-                }
-
-                gc.ShowCurrentPlayerInfo();
             }
+
+            currentPlayer.IncrementBallsScored();
+            currentPlayer.AddAbilityPoints(1);
+            gc.ShowCurrentPlayerInfo();
 
             gc.RemoveBall(other.gameObject);
             if (ModifierManager.Instance != null)
@@ -84,10 +77,12 @@ public class Counter : MonoBehaviour
                     rb.linearVelocity = Vector3.zero;
                     rb.angularVelocity = Vector3.zero;
                     rb.MovePosition(whiteBallStartPos.transform.position);
+                    whiteBall.GetComponent<BallPhysics>()?.RecalibrateSurfaceHeight();
                 }
                 else
                 {
                     whiteBall.transform.position = whiteBallStartPos.transform.position;
+                    whiteBall.GetComponent<BallPhysics>()?.RecalibrateSurfaceHeight();
                 }
             }
         }

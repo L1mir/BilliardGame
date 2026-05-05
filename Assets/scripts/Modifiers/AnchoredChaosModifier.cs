@@ -4,8 +4,7 @@ using DefaultNamespace;
 
 public class AnchoredChaosModifier : GameModifier, IEndOfTurnEffect
 {
-    [SerializeField] private int minAnchoredBalls = 2;
-    [SerializeField] private int maxAnchoredBalls = 5;
+    [SerializeField, Range(0f, 100f)] private float anchoredBallPercentage = 25f;
     [SerializeField] private Color anchoredColor = Color.gray;
 
     private readonly Dictionary<Rigidbody, BallStateData> anchoredBalls = new();
@@ -61,10 +60,7 @@ public class AnchoredChaosModifier : GameModifier, IEndOfTurnEffect
 
         if (availableBalls.Count == 0) return;
 
-        int count = Mathf.Min(
-            Random.Range(minAnchoredBalls, maxAnchoredBalls + 1),
-            availableBalls.Count
-        );
+        int count = CalculateAnchoredBallCount(availableBalls.Count);
 
         for (int i = 0; i < count; i++)
         {
@@ -76,6 +72,19 @@ public class AnchoredChaosModifier : GameModifier, IEndOfTurnEffect
 
             AnchorBall(rb);
         }
+    }
+
+    private int CalculateAnchoredBallCount(int totalBallsOnTable)
+    {
+        if (totalBallsOnTable <= 0)
+        {
+            return 0;
+        }
+
+        float normalizedPercentage = Mathf.Clamp(anchoredBallPercentage, 0f, 100f);
+        float rawCount = totalBallsOnTable * normalizedPercentage / 100f;
+
+        return Mathf.Clamp(Mathf.CeilToInt(rawCount), 0, totalBallsOnTable);
     }
 
     private void AnchorBall(Rigidbody rb)

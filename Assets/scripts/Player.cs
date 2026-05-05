@@ -3,7 +3,6 @@ using Unity.Cinemachine;
 using System;
 using System.Collections;
 using Abilities;
-using Random = UnityEngine.Random;
 
 public enum TeamType
 {
@@ -23,10 +22,10 @@ public class Player : MonoBehaviour
 
     [SerializeField] private float smooth_time = 0.1f;
     [SerializeField] private float max_speed = 120f;
-    [SerializeField] private float strike_force = 5f;
-    [SerializeField] private float min_force = 2f;
-    [SerializeField] private float max_force = 10f;
-    [SerializeField] private float force_changing_factor = 0.5f;
+    [SerializeField] private float strike_force = 0.95f;
+    [SerializeField] private float min_force = 0.45f;
+    [SerializeField] private float max_force = 1.55f;
+    [SerializeField] private float force_changing_factor = 0.65f;
     [SerializeField] private float zoom_changing_factor = 10f;
     [SerializeField] private float min_zoom = 10f;
     [SerializeField] private float max_zoom = 120f;
@@ -47,6 +46,33 @@ public class Player : MonoBehaviour
     {
         get => abilityPoints;
         set => abilityPoints = value;
+    }
+
+    public void AddAbilityPoints(int points)
+    {
+        if (points <= 0)
+        {
+            return;
+        }
+
+        abilityPoints += points;
+    }
+
+    public bool CanSpendAbilityPoints(int cost)
+    {
+        return abilityPoints >= Mathf.Max(0, cost);
+    }
+
+    public bool SpendAbilityPoints(int cost)
+    {
+        int normalizedCost = Mathf.Max(0, cost);
+        if (abilityPoints < normalizedCost)
+        {
+            return false;
+        }
+
+        abilityPoints -= normalizedCost;
+        return true;
     }
 
     [Header("Animation parameters")] [SerializeField]
@@ -161,44 +187,45 @@ public class Player : MonoBehaviour
             yield break;
         }
 
-        previousBallPosition = whiteBall.transform.position;
-
-        if (isStroke)
-            yield break;
-
+        if (isStroke) yield break;
+    
         isStroke = true;
+        previousBallPosition = whiteBall.transform.position;
 
         stick_animator.SetBool("isStroke", true);
         yield return new WaitForSeconds(strikeAnimationTime);
-        
+
         UIController.Instance?.HideAll();
         CameraSwitcher.Instance?.SwitchToTopDown();
-
+    
         Vector3 dir = -stick_prefab.transform.forward;
         dir = Vector3.ProjectOnPlane(dir, Vector3.up).normalized;
 
         Rigidbody rb = whiteBall.GetComponent<Rigidbody>();
+        BallPhysics ballPhysics = whiteBall.GetComponent<BallPhysics>();
 
-        rb.linearVelocity = Vector3.zero;
-        rb.angularVelocity = -dir * (strike_force * 1.5f);
-
-        rb.linearVelocity = dir * strike_force;
-
-        Vector3 spinAxis = Vector3.Cross(Vector3.up, dir);
-        rb.angularVelocity = spinAxis * (strike_force * 2.8f);
+        if (ballPhysics != null)
+        {
+            ballPhysics.ApplyCueStrike(dir, strike_force, 0.08f);
+        }
+        else
+        {
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+            rb.AddForce(dir * strike_force, ForceMode.Impulse);
+        }
 
         stick_animator.SetBool("isStroke", false);
-
+    
         yield return new WaitForSeconds(cooldownAfterStrike);
-
+    
         stick_prefab.SetActive(false);
-
+    
         yield return new WaitUntil(() => gc.IsReadyToMove());
         
         UIController.Instance?.ShowAll();
-        
         CameraSwitcher.Instance?.SwitchToFollow();
-
+    
         isStroke = false;
         gc.NextMove();
     }

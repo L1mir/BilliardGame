@@ -35,6 +35,12 @@ public class UIController : MonoBehaviour
     [SerializeField] private TextMeshProUGUI modifierDescriptionText;
     [SerializeField] private float notificationDuration = 2f;
     private Coroutine notificationCoroutine;
+    
+    [Header("NotEnoughAP")]
+    public GameObject notEnoughPointsText; // Перетащите текстовый объект в инспекторе
+    public float notEnoughApNotificationDuration = 2f;
+    private Coroutine notEnoughPointsCoroutine;
+
 
     private void Awake()
     {
@@ -145,14 +151,14 @@ public class UIController : MonoBehaviour
         string team_type_string;
         if (team_type == TeamType.Strip)
         {
-            team_type_string = "strip";
+            team_type_string = "ПОЛОСАТЫХ";
         }
         else
         {
-            team_type_string = "solid";
+            team_type_string = "ЦЕЛЬНЫХ";
         }
 
-        winning_team_text.text = "Winning Team : " + team_type_string;
+        winning_team_text.text = "Победила команда : " + team_type_string;
     }
     
     public void HideAll()
@@ -219,5 +225,30 @@ public class UIController : MonoBehaviour
         canvasGroup.alpha = 0;
 
         modifierNotificationPanel.SetActive(false);
+    }
+    
+    public void ShowNotEnoughPointsNotification()
+    {
+        if (notEnoughPointsText == null)
+        {
+            Debug.LogWarning("Not enough points text object not assigned!");
+            return;
+        }
+        
+        if (notEnoughPointsCoroutine != null)
+        {
+            StopCoroutine(notEnoughPointsCoroutine);
+            notEnoughPointsText.SetActive(false);
+        }
+        
+        notEnoughPointsText.SetActive(true);
+        notEnoughPointsCoroutine = StartCoroutine(HideNotificationAfterDelay());
+    }
+
+    private System.Collections.IEnumerator HideNotificationAfterDelay()
+    {
+        yield return new WaitForSeconds(notificationDuration);
+        notEnoughPointsText.SetActive(false);
+        notEnoughPointsCoroutine = null;
     }
 }

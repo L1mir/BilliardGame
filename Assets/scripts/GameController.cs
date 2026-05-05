@@ -16,7 +16,7 @@ public class GameController : MonoBehaviour
     private List<GameObject> balls;
     private int currentPlayer = 0;
     private int currentTeam = 0;
-    private float stopThreshold = 0.03f;
+    private float stopThreshold = 0.025f;
     private GameObject whiteBall;
     private Vector3 whiteBallStartPosition;
     private bool teamTypesAssigned = false;
@@ -103,6 +103,12 @@ public class GameController : MonoBehaviour
     
     public void QueueModifierActivation()
     {
+        if (scoredThisTurn)
+        {
+            return;
+        }
+
+        scoredThisTurn = true;
         shouldActivateModifier = true;
     }
     
@@ -180,10 +186,16 @@ public class GameController : MonoBehaviour
         {
             blackBall.AddComponent<BallPhysics>();
         }
+
+        if (blackBall != null && !balls.Contains(blackBall))
+        {
+            balls.Add(blackBall);
+        }
         
         if (whiteBall != null && whiteBallStartPos != null)
         {
             whiteBall.transform.position = whiteBallStartPos.transform.position;
+            whiteBall.GetComponent<BallPhysics>()?.RecalibrateSurfaceHeight();
             // whiteBall.GetComponent<Rigidbody>().linearDamping = dampingCoefficient;
         }
         else
@@ -199,9 +211,12 @@ public class GameController : MonoBehaviour
         for (int i = 0; i < otherBalls.Length && i < shuffledPositions.Count; i++)
         {
             otherBalls[i].transform.position = shuffledPositions[i].transform.position;
+            otherBalls[i].GetComponent<BallPhysics>()?.RecalibrateSurfaceHeight();
             // otherBalls[i].GetComponent<Rigidbody>().linearDamping = dampingCoefficient;
             balls.Add(otherBalls[i]);
         }
+
+        blackBall?.GetComponent<BallPhysics>()?.RecalibrateSurfaceHeight();
     }
 
     private List<T> RandomSort<T>(T[] collection)
@@ -228,8 +243,20 @@ public class GameController : MonoBehaviour
 
         foreach (var ball in balls)
         {
-            if (ball.activeInHierarchy &&
-                ball.GetComponent<Rigidbody>().linearVelocity.magnitude > stopThreshold)
+            if (!ball.activeInHierarchy)
+            {
+                continue;
+            }
+
+            BallPhysics physics = ball.GetComponent<BallPhysics>();
+            if (physics != null)
+            {
+                if (!physics.IsEffectivelyStopped)
+                {
+                    return false;
+                }
+            }
+            else if (ball.GetComponent<Rigidbody>().linearVelocity.magnitude > stopThreshold)
             {
                 return false;
             }
@@ -237,10 +264,21 @@ public class GameController : MonoBehaviour
         
         if (whiteBall != null)
         {
-            var rb = whiteBall.GetComponent<Rigidbody>();
-            if (rb.linearVelocity.magnitude > stopThreshold)
+            BallPhysics physics = whiteBall.GetComponent<BallPhysics>();
+            if (physics != null)
             {
-                return false;
+                if (!physics.IsEffectivelyStopped)
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                var rb = whiteBall.GetComponent<Rigidbody>();
+                if (rb.linearVelocity.magnitude > stopThreshold)
+                {
+                    return false;
+                }
             }
         }
         
@@ -271,12 +309,14 @@ public class GameController : MonoBehaviour
         }
     
         GetPlayer().isCurrentPlayer = true;
-        
+
         if (shouldActivateModifier)
         {
             ModifierManager.Instance?.ActivateRandomModifier();
-            shouldActivateModifier = false;
         }
+
+        shouldActivateModifier = false;
+        scoredThisTurn = false;
         
         ShowCurrentPlayerInfo();
     }

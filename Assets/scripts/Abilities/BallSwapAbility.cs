@@ -17,7 +17,6 @@ namespace Abilities
 
         private void Awake()
         {
-            abilityCost = 0;
             gameController = FindObjectOfType<GameController>();
         }
 
@@ -27,32 +26,27 @@ namespace Abilities
                 Activate();
         }
 
-        protected override void OnActivate()
+        protected override bool OnActivate()
         {
             if (gameController == null)
             {
                 Debug.LogError("GameController not found!");
-                isActive = false;
-                return;
+                return false;
             }
 
             Player currentPlayer = gameController.GetPlayer();
             if (currentPlayer == null)
             {
-                isActive = false;
-                return;
+                return false;
             }
 
-            if (currentPlayer.AbilityPoints < abilityCost)
+            if (!TrySpendAbilityCost(currentPlayer, gameController))
             {
-                isActive = false;
-                return;
+                return false;
             }
-
-            currentPlayer.AbilityPoints -= abilityCost;
-            gameController.ShowCurrentPlayerInfo();
 
             StartCoroutine(SwapCoroutine(currentPlayer));
+            return true;
         }
 
         private IEnumerator SwapCoroutine(Player player)
@@ -134,10 +128,15 @@ namespace Abilities
             rb1.isKinematic = false;
             rb2.isKinematic = false;
 
+            rb1.WakeUp();
+            rb2.WakeUp();
             rb1.linearVelocity = Vector3.zero;
             rb2.linearVelocity = Vector3.zero;
             rb1.angularVelocity = Vector3.zero;
             rb2.angularVelocity = Vector3.zero;
+
+            whiteBall.GetComponent<BallPhysics>()?.SyncWithCurrentTransform();
+            targetBall.GetComponent<BallPhysics>()?.SyncWithCurrentTransform();
 
             if (col1 != null) col1.enabled = true;
             if (col2 != null) col2.enabled = true;

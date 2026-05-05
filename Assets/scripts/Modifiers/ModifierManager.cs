@@ -26,12 +26,35 @@ public class ModifierManager : MonoBehaviour
             return;
         }
 
-        int randomIndex = Random.Range(0, availableModifiers.Length);
-        GameModifier modifier = availableModifiers[randomIndex];
-
-        if (modifier != null && !modifier.IsActive)
+        int inactiveCount = 0;
+        foreach (var modifier in availableModifiers)
         {
-            modifier.Activate();
+            if (modifier != null && !modifier.IsActive)
+            {
+                inactiveCount++;
+            }
+        }
+
+        if (inactiveCount == 0)
+        {
+            return;
+        }
+
+        int targetIndex = Random.Range(0, inactiveCount);
+        foreach (var modifier in availableModifiers)
+        {
+            if (modifier == null || modifier.IsActive)
+            {
+                continue;
+            }
+
+            if (targetIndex == 0)
+            {
+                modifier.Activate();
+                return;
+            }
+
+            targetIndex--;
         }
     }
 }

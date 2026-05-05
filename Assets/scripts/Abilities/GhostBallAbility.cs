@@ -10,45 +10,41 @@ namespace Abilities
 
         private void Awake()
         {
-            abilityCost = 0;
             mpb = new MaterialPropertyBlock();
         }
 
-        protected override void OnActivate()
+        protected override bool OnActivate()
         {
-            var turnManager = FindObjectOfType<TurnEffectManager>();
-            if (turnManager != null)
-            {
-                turnManager.Register(this);
-            }
-            
             var allBalls = GameObject.FindGameObjectsWithTag("Ball");
             GameController gameController = FindObjectOfType<GameController>();
-            if (gameController == null) return;
+            if (gameController == null) return false;
 
             Player currentPlayer = gameController.GetPlayer();
-            if (currentPlayer == null) return;
+            if (currentPlayer == null) return false;
 
-            if (currentPlayer.AbilityPoints < abilityCost)
+            if (!TrySpendAbilityCost(currentPlayer, gameController))
             {
-                return;
+                return false;
             }
 
-            currentPlayer.AbilityPoints -= abilityCost;
-            gameController.ShowCurrentPlayerInfo();
-
             Team currentTeam = currentPlayer.GetTeam();
-            if (currentTeam == null) return;
+            if (currentTeam == null) return false;
 
             int layerToIgnore = currentTeam.GetTeamType() == TeamType.Solid ? 
                 LayerMask.NameToLayer("Strip") : 
                 LayerMask.NameToLayer("Solid");
 
             var whiteBall = GameObject.FindGameObjectWithTag("WhiteBall");
-            if (whiteBall == null) return;
+            if (whiteBall == null) return false;
 
             whiteBallCollider = whiteBall.GetComponent<Collider>();
-            if (whiteBallCollider == null) return;
+            if (whiteBallCollider == null) return false;
+
+            var turnManager = FindObjectOfType<TurnEffectManager>();
+            if (turnManager != null)
+            {
+                turnManager.Register(this);
+            }
 
             foreach (var ball in allBalls)
             {
@@ -75,6 +71,8 @@ namespace Abilities
                     }
                 }   
             }
+
+            return true;
         }
         
         public void OnTurnEnd()

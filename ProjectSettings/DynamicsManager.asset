@@ -6,12 +6,12 @@ PhysicsManager:
   serializedVersion: 21
   m_Gravity: {x: 0, y: -9.81, z: 0}
   m_DefaultMaterial: {fileID: 0}
-  m_BounceThreshold: 0.2
+  m_BounceThreshold: 0.1
   m_DefaultMaxDepenetrationVelocity: 10
-  m_SleepThreshold: 0.01
-  m_DefaultContactOffset: 0.003
-  m_DefaultSolverIterations: 20
-  m_DefaultSolverVelocityIterations: 10
+  m_SleepThreshold: 0.002
+  m_DefaultContactOffset: 0.0015
+  m_DefaultSolverIterations: 24
+  m_DefaultSolverVelocityIterations: 12
   m_QueriesHitBackfaces: 0
   m_QueriesHitTriggers: 1
   m_EnableAdaptiveForce: 0
@@ -35,7 +35,7 @@ PhysicsManager:
   m_ImprovedPatchFriction: 0
   m_GenerateOnTriggerStayEvents: 1
   m_SolverType: 0
-  m_DefaultMaxAngularSpeed: 50
+  m_DefaultMaxAngularSpeed: 120
   m_ScratchBufferChunkCount: 4
   m_CurrentBackendId: 4072204805
   m_FastMotionThreshold: 3.4028235e+38
